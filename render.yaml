@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: couple-counseling
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_AUTH_TOKEN
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: NEXT_PUBLIC_SENTRY_DSN
+        sync: false
+      - key: RATE_LIMIT_MAX_PER_MINUTE
+        value: "20"
+      - key: NODE_ENV
+        value: production

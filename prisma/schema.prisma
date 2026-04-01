@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions         Session[]
+  counselorProfile CounselorProfile?
+}
+
+model CounselorProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  displayName String  // e.g. "김지수 상담사"
+  avatarUrl   String? // professional avatar image
+  specialty   String? // e.g. "부부상담, 감정중심치료"
+  user        User    @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  id              String        @id @default(cuid())
+  userId          String
+  counselorName   String        @default("상담사") // fallback name per KDS-49
+  status          String        @default("active") // active, completed, crisis
+  conflictType    String?       // communication, finance, parenting, infidelity, inlaw, intimacy
+  onboardingDone  Boolean       @default(false)
+  crisisLevel     String?       // CRITICAL, WARNING, WATCH
+  watchCount      Int           @default(0) // WATCH occurrences for auto-escalation
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id])
+  messages      Message[]
+  emotionStates EmotionState[]
+
+  @@index([userId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  sessionId String
+  role      String   // user, assistant, system
+  content   String
+  metadata  String?  // JSON: crisis detection results, emotion tags
+  createdAt DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+}
+
+model EmotionState {
+  id        String   @id @default(cuid())
+  sessionId String
+  emotion   String   // e.g. anger, sadness, fear, shame, loneliness
+  intensity Float    // 0.0 ~ 1.0
+  source    String?  // what triggered this emotion
+  context   String?  // additional analysis context
+  createdAt DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+}
