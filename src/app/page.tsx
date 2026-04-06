@@ -6,9 +6,14 @@ export default function LandingPage() {
       {/* ── Nav ── */}
       <nav className="landing-nav">
         <span className="landing-wordmark">부부상담</span>
-        <Link href="/auth/login" className="landing-nav-login">
-          로그인
-        </Link>
+        <div className="about-nav-links">
+          <Link href="/about" className="about-nav-link">
+            About Us
+          </Link>
+          <Link href="/auth/login" className="landing-nav-login">
+            로그인
+          </Link>
+        </div>
       </nav>
 
       {/* ── Hero ── */}

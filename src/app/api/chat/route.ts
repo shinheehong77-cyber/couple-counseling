@@ -5,6 +5,7 @@ import { detectCrisis } from "@/lib/crisis-detection";
 import { SYSTEM_PROMPT, getConflictTypePrompt } from "@/lib/counseling-prompts";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { formatSurveyContextForPrompt } from "@/lib/survey/format-ai-context";
+import { buildSessionHistoryContext } from "@/lib/session-history";
 import type { AIContextPayload } from "@/lib/survey/types";
 
 const anthropic = new Anthropic();
@@ -109,6 +110,14 @@ export async function POST(req: NextRequest) {
       systemParts.push(formatSurveyContextForPrompt(surveyPayload));
     } catch {
       // malformed survey JSON, skip
+    }
+  }
+
+  // Inject past counseling history for continuity
+  if (session.userId) {
+    const historyContext = await buildSessionHistoryContext(session.userId, sessionId);
+    if (historyContext) {
+      systemParts.push(historyContext);
     }
   }
 
