@@ -16,6 +16,14 @@ const CRITICAL_PATTERNS = {
     "삶이 의미 없다", "모든 게 끝났다",
     "유서", "마지막", "이별 편지",
     "약을 먹겠다", "뛰어내리겠다",
+    // 간접 자살 사고 키워드 (KDS-152)
+    "없는 게 나을", "짐이 되", "안 깨면 좋겠",
+    "죽는 게 나을", "살아있는 게 힘들",
+    "태어나지 말았어야", "내가 없어지면",
+    "더 이상 버틸 수 없", "살아서 뭐하나",
+    "내가 없으면 나을", "눈 감고 싶다",
+    "다 끝내고 싶", "사라져 버리고 싶",
+    "세상에 나 혼자", "이렇게 살 바에",
   ],
   domesticViolence: [
     "때렸다", "맞았다", "폭력", "폭행",
@@ -24,6 +32,11 @@ const CRITICAL_PATTERNS = {
     "아이를 때린다", "아이에게 손을 댄다",
     "성폭력", "강제로", "동의 없이",
     "감금", "못 나가게 한다", "핸드폰을 뺏었다",
+    // 해요체/합쇼체 활용형 (KDS-152)
+    "때렸어요", "맞았어요", "밀쳤어요",
+    "목을 졸랐어요", "물건을 던졌어요",
+    "때렸습니다", "맞았습니다", "밀쳤습니다",
+    "때려요", "맞아요", "때리고 있어요",
   ],
 };
 
@@ -81,8 +94,30 @@ const WARNING_RESPONSE = `말씀하신 상황이 많이 힘드시겠어요.
 전문가와 함께하면 더 안전하고 효과적으로 문제를 다룰 수 있어요.
 저도 계속 함께할 수 있지만, 전문 상담을 병행하시는 것을 권해드립니다.`;
 
+// 간접 자살 사고 정규식 패턴 (KDS-152)
+const INDIRECT_SELF_HARM_REGEX: RegExp[] = [
+  /없는\s*게\s*나(을|았을|으면)/,       // "없는 게 나을 것 같아" 등
+  /짐(이|만)\s*되(고|는|어|니까)/,       // "짐이 되고 싶지 않아" 등
+  /안\s*깨(면|었으면)\s*좋겠/,           // "안 깨면 좋겠다" 등
+  /이렇게\s*살\s*바(에|엔|에야)/,        // "이렇게 살 바에" 등
+];
+
+// DV 해요체/합쇼체 정규식 패턴 (KDS-152)
+const DV_CONJUGATION_REGEX: RegExp[] = [
+  /(때리|때렸|맞았|밀쳤)(어요|습니다|어|었어)/,
+  /목을?\s*조르?(았어요|습니다|고\s*있어요)/,
+  /물건을?\s*던(졌어요|집니다|지고\s*있어요)/,
+  /(폭행|폭력)(했어요|당했어요|을\s*당했습니다)/,
+];
+
 function matchPatterns(text: string, patterns: string[]): string[] {
   return patterns.filter((p) => text.includes(p));
+}
+
+function matchRegexPatterns(text: string, regexes: RegExp[]): string[] {
+  return regexes
+    .filter((r) => r.test(text))
+    .map((r) => r.source);
 }
 
 export function detectCrisis(text: string): CrisisResult {
@@ -90,19 +125,23 @@ export function detectCrisis(text: string): CrisisResult {
 
   // Check CRITICAL first
   const selfHarmMatches = matchPatterns(normalized, CRITICAL_PATTERNS.selfHarm);
-  if (selfHarmMatches.length > 0) {
+  const selfHarmRegexMatches = matchRegexPatterns(normalized, INDIRECT_SELF_HARM_REGEX);
+  const allSelfHarmMatches = [...selfHarmMatches, ...selfHarmRegexMatches];
+  if (allSelfHarmMatches.length > 0) {
     return {
       level: "CRITICAL",
-      matched: selfHarmMatches,
+      matched: allSelfHarmMatches,
       response: CRITICAL_SELF_HARM_RESPONSE,
     };
   }
 
   const violenceMatches = matchPatterns(normalized, CRITICAL_PATTERNS.domesticViolence);
-  if (violenceMatches.length > 0) {
+  const violenceRegexMatches = matchRegexPatterns(normalized, DV_CONJUGATION_REGEX);
+  const allViolenceMatches = [...violenceMatches, ...violenceRegexMatches];
+  if (allViolenceMatches.length > 0) {
     return {
       level: "CRITICAL",
-      matched: violenceMatches,
+      matched: allViolenceMatches,
       response: CRITICAL_VIOLENCE_RESPONSE,
     };
   }
