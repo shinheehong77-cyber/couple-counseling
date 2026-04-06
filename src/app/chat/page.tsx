@@ -33,14 +33,27 @@ export default function ChatPage() {
   const userName = "사용자";
   const userId = "demo-user";
 
-  // Create session on mount
+  // Create session on mount, injecting survey context if available
   useEffect(() => {
     async function initSession() {
       try {
+        // Read survey AI context from sessionStorage
+        let aiContextJson = null;
+        try {
+          const stored = sessionStorage.getItem("survey_ai_context");
+          if (stored) {
+            aiContextJson = JSON.parse(stored);
+            // Clear after use so next session doesn't reuse stale context
+            sessionStorage.removeItem("survey_ai_context");
+          }
+        } catch {
+          // sessionStorage not available
+        }
+
         const res = await fetch("/api/sessions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId }),
+          body: JSON.stringify({ userId, ...(aiContextJson ? { aiContextJson } : {}) }),
         });
         const data = await res.json();
         if (data.id) setSessionId(data.id);
@@ -192,10 +205,9 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="chat-screen">
       <ChatHeader counselorName={counselorName} />
 
-      {/* Emotion indicator bar */}
       {latestEmotion && (
         <EmotionIndicator
           emotion={latestEmotion.emotion}
@@ -203,8 +215,7 @@ export default function ChatPage() {
         />
       )}
 
-      {/* Messages area */}
-      <main className="flex-1 overflow-y-auto px-4 py-6">
+      <main className="chat-messages">
         {messages.length === 0 ? (
           <ChatWelcome
             counselorName={counselorName}
@@ -228,8 +239,7 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </main>
 
-      {/* Input area */}
-      <footer className="border-t border-stone-200 bg-white px-4 py-3">
+      <footer className="chat-footer">
         <div className="flex items-end gap-2 max-w-3xl mx-auto">
           <textarea
             ref={inputRef}
@@ -238,18 +248,13 @@ export default function ChatPage() {
             onKeyDown={handleKeyDown}
             placeholder="이야기를 나눠보세요..."
             rows={1}
-            className="flex-1 resize-none rounded-2xl border border-stone-300 px-4 py-3
-                       text-base text-stone-800 placeholder:text-stone-400
-                       focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500
-                       max-h-32 overflow-y-auto"
+            className="chat-input"
             disabled={isLoading || !sessionId}
           />
           <button
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || isLoading || !sessionId}
-            className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center
-                       hover:bg-emerald-700 disabled:bg-stone-300 disabled:cursor-not-allowed
-                       transition-colors flex-shrink-0"
+            className="chat-send-btn"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

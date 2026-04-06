@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>부부상담 — 상담 채팅</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <style>
+    :root {
+      --bg-base: #1A1714;
+      --bg-surface: #23201C;
+      --bg-elevated: #2D2924;
+      --text-primary: #F4EFE6;
+      --text-secondary: #B8AE9E;
+      --text-tertiary: #7A7268;
+      --accent-primary: #D4A574;
+      --accent-soft: #3A3129;
+      --border-subtle: #332E28;
+      --border-strong: #4A4339;
+      --font-display: "Noto Serif KR", Georgia, serif;
+      --font-body: "Pretendard Variable", "Pretendard", -apple-system, sans-serif;
+      --ease-gentle: cubic-bezier(0.25, 0.1, 0.25, 1);
+      --duration-base: 250ms;
+      --duration-fast: 150ms;
+    }
+    [data-theme="light"] {
+      --bg-base: #FAF7F0;
+      --bg-surface: #F4EFE4;
+      --bg-elevated: #EDE6D6;
+      --text-primary: #2B2420;
+      --text-secondary: #5C524A;
+      --text-tertiary: #8B8176;
+      --accent-primary: #A67A42;
+      --accent-soft: #EBE0CC;
+      --border-subtle: #E5DCC9;
+      --border-strong: #C9BDA5;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      word-break: keep-all;
+    }
+
+    /* ── Chat shell ── */
+    .chat-screen {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border-subtle);
+      background: transparent;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .back-btn svg { width: 20px; height: 20px; }
+    .counselor-avatar {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-primary);
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 500;
+    }
+    .counselor-info { flex: 1; }
+    .counselor-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .counselor-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 1px;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background var(--duration-fast) var(--ease-gentle);
+    }
+    .icon-btn:hover { background: var(--bg-surface); color: var(--text-secondary); }
+    .icon-btn svg { width: 18px; height: 18px; }
+
+    /* ── Emotion indicator ── */
+    .emotion-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+    .emotion-label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+    .emotion-track {
+      flex: 1;
+      height: 2px;
+      background: var(--border-subtle);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .emotion-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: var(--accent-primary);
+      width: 72%;
+      transition: width var(--duration-base) var(--ease-gentle);
+    }
+    .emotion-value {
+      font-size: 11px;
+      color: var(--accent-primary);
+      white-space: nowrap;
+    }
+
+    /* ── Messages ── */
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .messages::-webkit-scrollbar { width: 4px; }
+    .messages::-webkit-scrollbar-track { background: transparent; }
+    .messages::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 100px; }
+
+    /* Date divider */
+    .date-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-tertiary);
+      font-size: 11px;
+    }
+    .date-divider::before,
+    .date-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    /* Message rows */
+    .msg-row {
+      display: flex;
+      gap: 10px;
+    }
+    .msg-row.user { justify-content: flex-end; }
+    .msg-row.counselor { justify-content: flex-start; }
+
+    .msg-avatar {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-primary);
+      font-family: var(--font-display);
+      font-size: 13px;
+      margin-top: 2px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .msg-content { max-width: 78%; display: flex; flex-direction: column; }
+    .msg-row.user .msg-content { align-items: flex-end; }
+
+    .msg-name {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+      margin-left: 4px;
+    }
+
+    .bubble-counselor {
+      padding: 14px 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      border-top-left-radius: 4px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      font-family: var(--font-display);
+    }
+    .bubble-user {
+      padding: 14px 16px;
+      background: var(--accent-soft);
+      border-radius: 16px;
+      border-top-right-radius: 4px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--accent-primary);
+    }
+    .msg-time {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+      margin-left: 4px;
+      margin-right: 4px;
+    }
+
+    /* Typing indicator */
+    .typing-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .typing-bubble {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 14px 18px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      border-top-left-radius: 4px;
+    }
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      animation: typing-bounce 1.2s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes typing-bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-4px); }
+    }
+
+    /* Suggested prompts */
+    .suggested-prompts {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px 20px;
+      border-top: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+    .prompt-chip {
+      padding: 8px 14px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 100px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-family: var(--font-body);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color var(--duration-fast) var(--ease-gentle),
+                  color var(--duration-fast) var(--ease-gentle);
+    }
+    .prompt-chip:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    /* ── Input footer ── */
+    .chat-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .chat-input {
+      flex: 1;
+      min-height: 44px;
+      max-height: 128px;
+      padding: 12px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 22px;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.5;
+      resize: none;
+      outline: none;
+      overflow-y: auto;
+      transition: border-color var(--duration-fast) var(--ease-gentle);
+    }
+    .chat-input::placeholder { color: var(--text-tertiary); }
+    .chat-input:focus { border-color: var(--accent-primary); }
+    .send-btn {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent-primary);
+      color: var(--bg-base);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: filter var(--duration-fast) var(--ease-gentle),
+                  transform var(--duration-fast) var(--ease-gentle);
+    }
+    .send-btn:hover { filter: brightness(1.08); }
+    .send-btn:active { transform: scale(0.92); }
+    .send-btn:disabled { background: var(--border-strong); cursor: not-allowed; }
+    .send-btn svg { width: 20px; height: 20px; }
+
+    /* ── Bottom nav ── */
+    .nav-bottom {
+      display: flex;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-base);
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      flex-shrink: 0;
+    }
+    .nav-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 12px 0;
+      min-height: 56px;
+      color: var(--text-tertiary);
+      font-size: 10px;
+      font-family: var(--font-body);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    .nav-tab.active { color: var(--accent-primary); }
+    .nav-tab svg { width: 22px; height: 22px; stroke: currentColor; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-screen">
+
+    <!-- Header -->
+    <header class="chat-header">
+      <button class="back-btn" aria-label="뒤로가기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+        </svg>
+      </button>
+      <div class="counselor-avatar">우</div>
+      <div class="counselor-info">
+        <div class="counselor-name">우리 상담사</div>
+        <div class="counselor-status">
+          <span class="status-dot"></span>
+          응답 준비 중
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="toggleTheme()" aria-label="테마 전환">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" /></svg>
+        </button>
+        <button class="icon-btn" aria-label="더보기">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Emotion bar -->
+    <div class="emotion-bar">
+      <span class="emotion-label">감정 온도</span>
+      <div class="emotion-track">
+        <div class="emotion-fill"></div>
+      </div>
+      <span class="emotion-value">72%</span>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages" id="messages">
+
+      <div class="date-divider">오늘 오후 10:17</div>
+
+      <!-- Counselor welcome -->
+      <div class="msg-row counselor">
+        <div class="msg-avatar" aria-hidden="true">우</div>
+        <div class="msg-content">
+          <div class="msg-name">우리 상담사</div>
+          <div class="bubble-counselor">
+            안녕하세요. 오늘 어떻게 지내셨나요?<br>
+            편하게 이야기해 주세요. 여기는 판단 없는 공간입니다.
+          </div>
+          <div class="msg-time">오후 10:17</div>
+        </div>
+      </div>
+
+      <!-- User reply -->
+      <div class="msg-row user">
+        <div class="msg-content">
+          <div class="bubble-user">
+            요즘 파트너와 대화가 잘 안 되는 것 같아요. 말을 꺼내려 하면 어딘가 어색하고 막히는 느낌이 들어요.
+          </div>
+          <div class="msg-time">오후 10:19</div>
+        </div>
+      </div>
+
+      <!-- Counselor response -->
+      <div class="msg-row counselor">
+        <div class="msg-avatar" aria-hidden="true">우</div>
+        <div class="msg-content">
+          <div class="msg-name">우리 상담사</div>
+          <div class="bubble-counselor">
+            그 느낌, 꽤 많은 분들이 경험하세요.<br><br>
+            대화가 어색해진 게 언제부터인지 기억하시나요? 특별한 계기가 있었는지, 아니면 서서히 그렇게 된 건지요.
+          </div>
+          <div class="msg-time">오후 10:20</div>
+        </div>
+      </div>
+
+      <!-- User reply 2 -->
+      <div class="msg-row user">
+        <div class="msg-content">
+          <div class="bubble-user">
+            서서히요... 아이 생기고 나서부터인 것 같기도 해요. 같이 있어도 각자 일 얘기나 아이 얘기만 하게 되더라고요.
+          </div>
+          <div class="msg-time">오후 10:22</div>
+        </div>
+      </div>
+
+      <!-- Counselor typing -->
+      <div class="typing-row">
+        <div class="msg-avatar" aria-hidden="true">우</div>
+        <div class="typing-bubble" aria-label="상담사가 입력 중">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Suggested prompts -->
+    <div class="suggested-prompts" id="suggested-prompts">
+      <button class="prompt-chip">둘만의 시간이 없어요</button>
+      <button class="prompt-chip">서로 많이 바빠요</button>
+      <button class="prompt-chip">더 이야기하고 싶어요</button>
+    </div>
+
+    <!-- Input footer -->
+    <div class="chat-footer">
+      <textarea
+        class="chat-input"
+        id="chat-input"
+        placeholder="오늘의 마음을 털어놓아 보세요..."
+        rows="1"
+        aria-label="메시지 입력"
+      ></textarea>
+      <button class="send-btn" aria-label="전송">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Bottom nav -->
+    <nav class="nav-bottom" aria-label="하단 메뉴">
+      <button class="nav-tab" aria-label="홈">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+        홈
+      </button>
+      <button class="nav-tab active" aria-current="page" aria-label="상담">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+        상담
+      </button>
+      <button class="nav-tab" aria-label="설문">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" /></svg>
+        설문
+      </button>
+      <button class="nav-tab" aria-label="대시보드">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>
+        분석
+      </button>
+    </nav>
+
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+
+    // Auto-resize textarea
+    const input = document.getElementById('chat-input');
+    input.addEventListener('input', () => {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 128) + 'px';
+
+      // Hide prompts when typing
+      const prompts = document.getElementById('suggested-prompts');
+      if (input.value.trim()) {
+        prompts.style.display = 'none';
+      } else {
+        prompts.style.display = '';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>부부상담 — 관계 설문</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <style>
+    :root {
+      --bg-base: #1A1714;
+      --bg-surface: #23201C;
+      --bg-elevated: #2D2924;
+      --text-primary: #F4EFE6;
+      --text-secondary: #B8AE9E;
+      --text-tertiary: #7A7268;
+      --accent-primary: #D4A574;
+      --accent-soft: #3A3129;
+      --border-subtle: #332E28;
+      --border-strong: #4A4339;
+      --font-display: "Noto Serif KR", Georgia, serif;
+      --font-body: "Pretendard Variable", "Pretendard", -apple-system, sans-serif;
+      --ease-gentle: cubic-bezier(0.25, 0.1, 0.25, 1);
+      --duration-base: 250ms;
+      --duration-fast: 150ms;
+    }
+    [data-theme="light"] {
+      --bg-base: #FAF7F0;
+      --bg-surface: #F4EFE4;
+      --bg-elevated: #EDE6D6;
+      --text-primary: #2B2420;
+      --text-secondary: #5C524A;
+      --text-tertiary: #8B8176;
+      --accent-primary: #A67A42;
+      --accent-soft: #EBE0CC;
+      --border-subtle: #E5DCC9;
+      --border-strong: #C9BDA5;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      word-break: keep-all;
+      min-height: 100dvh;
+    }
+    button { cursor: pointer; font-family: var(--font-body); }
+
+    /* ── Survey layout ── */
+    .survey-screen {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .survey-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border-subtle);
+      background: transparent;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .back-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
+    .back-btn svg { width: 20px; height: 20px; }
+    .survey-header-info { flex: 1; }
+    .survey-header-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .survey-header-sub {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 2px;
+    }
+
+    /* ── Progress bar ── */
+    .progress-bar-wrapper {
+      padding: 16px 24px 0;
+      flex-shrink: 0;
+    }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .progress-label {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+    .progress-count {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+    .progress-track {
+      height: 2px;
+      background: var(--border-subtle);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent-primary);
+      border-radius: 100px;
+      transition: width 400ms var(--ease-gentle);
+    }
+
+    /* ── Question area ── */
+    .question-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .question-category {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--accent-primary);
+      background: var(--accent-soft);
+      border-radius: 100px;
+      padding: 3px 10px;
+      margin-bottom: 16px;
+    }
+    .question-number {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+    }
+    .question-text {
+      font-family: var(--font-display);
+      font-size: 22px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .question-hint {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    /* ── Option types ── */
+
+    /* Likert scale */
+    .likert-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .likert-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 52px;
+      padding: 12px 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color var(--duration-fast) var(--ease-gentle),
+                  background var(--duration-fast) var(--ease-gentle);
+    }
+    .likert-option:hover {
+      border-color: var(--border-strong);
+    }
+    .likert-option.selected {
+      border-color: var(--accent-primary);
+      background: var(--accent-soft);
+    }
+    .likert-radio {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color var(--duration-fast) var(--ease-gentle);
+    }
+    .likert-option.selected .likert-radio {
+      border-color: var(--accent-primary);
+    }
+    .likert-radio::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      opacity: 0;
+      transition: opacity var(--duration-fast) var(--ease-gentle);
+    }
+    .likert-option.selected .likert-radio::after { opacity: 1; }
+    .likert-text {
+      font-size: 15px;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+    .likert-option.selected .likert-text { color: var(--accent-primary); }
+
+    /* Slider question */
+    .slider-wrapper {
+      padding: 8px 0;
+    }
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .slider-label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+    .slider-input {
+      width: 100%;
+      height: 2px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: linear-gradient(to right, var(--accent-primary) 60%, var(--border-subtle) 60%);
+      border-radius: 100px;
+      outline: none;
+      cursor: pointer;
+    }
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      border: 3px solid var(--bg-base);
+      box-shadow: 0 0 0 1px var(--accent-primary);
+      cursor: grab;
+    }
+    .slider-value {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 32px;
+      color: var(--accent-primary);
+      margin-top: 20px;
+    }
+    .slider-value-label {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+
+    /* Text area question */
+    .survey-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-family: var(--font-display);
+      font-size: 16px;
+      line-height: 1.7;
+      resize: none;
+      outline: none;
+      transition: border-color var(--duration-fast) var(--ease-gentle);
+    }
+    .survey-textarea::placeholder { color: var(--text-tertiary); font-family: var(--font-body); }
+    .survey-textarea:focus { border-color: var(--accent-primary); }
+    .char-count {
+      text-align: right;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 6px;
+    }
+
+    /* ── Footer ── */
+    .survey-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .btn-prev {
+      min-height: 52px;
+      padding: 0 20px;
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+    .btn-prev:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+    .btn-next {
+      flex: 1;
+      min-height: 52px;
+      background: var(--accent-primary);
+      border: none;
+      border-radius: 8px;
+      color: var(--bg-base);
+      font-size: 15px;
+      font-weight: 500;
+      transition: filter var(--duration-fast) var(--ease-gentle),
+                  transform var(--duration-fast) var(--ease-gentle);
+    }
+    .btn-next:hover { filter: brightness(1.08); }
+    .btn-next:active { transform: scale(0.98); }
+    .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Section intro card ── */
+    .section-intro {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+    }
+    .section-intro-icon {
+      font-size: 32px;
+      margin-bottom: 16px;
+      color: var(--accent-primary);
+    }
+    .section-intro-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .section-intro-desc {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="survey-screen">
+    <!-- Header -->
+    <header class="survey-header">
+      <button class="back-btn" aria-label="뒤로가기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+        </svg>
+      </button>
+      <div class="survey-header-info">
+        <div class="survey-header-title">관계 설문</div>
+        <div class="survey-header-sub">소통 방식 파악 · 12문항</div>
+      </div>
+      <button onclick="toggleTheme()" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border-subtle);background:transparent;color:var(--text-tertiary);font-size:16px;" aria-label="테마 전환">☽</button>
+    </header>
+
+    <!-- Progress -->
+    <div class="progress-bar-wrapper">
+      <div class="progress-meta">
+        <span class="progress-label">소통 방식</span>
+        <span class="progress-count" id="progress-text">3 / 12</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:25%"></div>
+      </div>
+    </div>
+
+    <!-- Questions -->
+    <div class="question-area">
+
+      <!-- Q3: Likert -->
+      <div id="q3" class="question-panel active">
+        <div class="question-category">소통 방식</div>
+        <div class="question-number">질문 3</div>
+        <h2 class="question-text">
+          갈등이 생겼을 때 어떻게 해결하시나요?
+        </h2>
+        <p class="question-hint">가장 자주 선택하는 방식을 골라주세요.</p>
+
+        <div class="likert-options">
+          <div class="likert-option" onclick="selectOption(this)">
+            <div class="likert-radio"></div>
+            <span class="likert-text">바로 대화를 시도한다</span>
+          </div>
+          <div class="likert-option" onclick="selectOption(this)">
+            <div class="likert-radio"></div>
+            <span class="likert-text">진정이 되면 그때 이야기한다</span>
+          </div>
+          <div class="likert-option selected" onclick="selectOption(this)">
+            <div class="likert-radio"></div>
+            <span class="likert-text">상대방이 먼저 말을 꺼내길 기다린다</span>
+          </div>
+          <div class="likert-option" onclick="selectOption(this)">
+            <div class="likert-radio"></div>
+            <span class="likert-text">혼자 해결하고 넘어가는 편이다</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q4 preview: Slider (hidden, shown here for design reference) -->
+      <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:12px; padding:20px; opacity:0.5;">
+        <div class="question-number" style="margin-bottom:6px;">다음 질문 미리보기</div>
+        <p style="font-family:var(--font-display); font-size:16px; color:var(--text-secondary); line-height:1.5;">현재 우리 관계에서 느끼는 친밀감은 어느 정도인가요?</p>
+        <p style="font-size:12px; color:var(--text-tertiary); margin-top:8px;">슬라이더로 응답 예정</p>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="survey-footer">
+      <button class="btn-prev">이전</button>
+      <button class="btn-next" id="btn-next">다음 →</button>
+    </footer>
+  </div>
+
+  <!-- Also show section intro screen variant -->
+  <div style="max-width:560px; margin:40px auto; padding:0 24px 40px;">
+    <p style="font-size:11px; letter-spacing:0.08em; color:var(--text-tertiary); text-transform:uppercase; margin-bottom:16px;">화면 변형 — 섹션 시작</p>
+    <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:12px; padding:40px 28px; text-align:center;">
+      <div style="font-size:40px; margin-bottom:20px; color:var(--accent-primary);">◎</div>
+      <h3 style="font-family:var(--font-display); font-size:22px; font-weight:500; color:var(--text-primary); margin-bottom:14px; line-height:1.4;">
+        소통 방식을 알아볼게요
+      </h3>
+      <p style="font-size:15px; line-height:1.7; color:var(--text-secondary); margin-bottom:32px;">
+        두 분이 갈등을 어떻게 다루고, 감정을 어떻게 표현하는지 알아봅니다.
+        정답은 없습니다. 솔직하게 응답해주세요.
+      </p>
+      <button style="min-height:52px; padding:0 40px; background:var(--accent-primary); color:var(--bg-base); border:none; border-radius:8px; font-size:15px; font-weight:500; cursor:pointer;">
+        시작하기
+      </button>
+      <p style="font-size:12px; color:var(--text-tertiary); margin-top:16px;">약 4분 소요 예정 · 6개 문항</p>
+    </div>
+  </div>
+
+  <!-- Completion screen variant -->
+  <div style="max-width:560px; margin:0 auto; padding:0 24px 80px;">
+    <p style="font-size:11px; letter-spacing:0.08em; color:var(--text-tertiary); text-transform:uppercase; margin-bottom:16px;">화면 변형 — 완료</p>
+    <div style="text-align:center; padding:48px 24px;">
+      <div style="width:72px; height:72px; border-radius:50%; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; margin:0 auto 28px; font-size:32px; color:var(--accent-primary);">✦</div>
+      <h3 style="font-family:var(--font-display); font-size:26px; font-weight:500; color:var(--text-primary); margin-bottom:16px; line-height:1.3;">
+        수고하셨습니다
+      </h3>
+      <p style="font-size:16px; line-height:1.7; color:var(--text-secondary); margin-bottom:40px; max-width:320px; margin-left:auto; margin-right:auto;">
+        응답해 주신 내용을 바탕으로 두 분의 관계 패턴을 분석하고 있습니다.
+      </p>
+      <a href="dashboard.html" style="display:inline-flex; align-items:center; justify-content:center; min-height:52px; padding:0 40px; background:var(--accent-primary); color:var(--bg-base); border:none; border-radius:8px; font-size:15px; font-weight:500; text-decoration:none;">
+        결과 확인하기
+      </a>
+    </div>
+  </div>
+
+  <script>
+    function selectOption(el) {
+      el.closest('.likert-options').querySelectorAll('.likert-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+  </script>
+</body>
+</html>

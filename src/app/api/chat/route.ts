@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { detectCrisis } from "@/lib/crisis-detection";
 import { SYSTEM_PROMPT, getConflictTypePrompt } from "@/lib/counseling-prompts";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { formatSurveyContextForPrompt } from "@/lib/survey/format-ai-context";
+import type { AIContextPayload } from "@/lib/survey/types";
 
 const anthropic = new Anthropic();
 
@@ -99,6 +101,17 @@ export async function POST(req: NextRequest) {
 
   // Build message history for Claude
   const systemParts = [SYSTEM_PROMPT];
+
+  // Inject survey context if available
+  if (session.surveyContextJson) {
+    try {
+      const surveyPayload = JSON.parse(session.surveyContextJson) as AIContextPayload;
+      systemParts.push(formatSurveyContextForPrompt(surveyPayload));
+    } catch {
+      // malformed survey JSON, skip
+    }
+  }
+
   if (session.conflictType) {
     systemParts.push(getConflictTypePrompt(session.conflictType));
   }

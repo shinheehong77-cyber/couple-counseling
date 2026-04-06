@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>부부상담 — 관계 대시보드</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <style>
+    :root {
+      --bg-base: #1A1714;
+      --bg-surface: #23201C;
+      --bg-elevated: #2D2924;
+      --text-primary: #F4EFE6;
+      --text-secondary: #B8AE9E;
+      --text-tertiary: #7A7268;
+      --accent-primary: #D4A574;
+      --accent-soft: #3A3129;
+      --border-subtle: #332E28;
+      --border-strong: #4A4339;
+      --font-display: "Noto Serif KR", Georgia, serif;
+      --font-body: "Pretendard Variable", "Pretendard", -apple-system, sans-serif;
+      --ease-gentle: cubic-bezier(0.25, 0.1, 0.25, 1);
+      --duration-base: 250ms;
+      --duration-fast: 150ms;
+    }
+    [data-theme="light"] {
+      --bg-base: #FAF7F0;
+      --bg-surface: #F4EFE4;
+      --bg-elevated: #EDE6D6;
+      --text-primary: #2B2420;
+      --text-secondary: #5C524A;
+      --text-tertiary: #8B8176;
+      --accent-primary: #A67A42;
+      --accent-soft: #EBE0CC;
+      --border-subtle: #E5DCC9;
+      --border-strong: #C9BDA5;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      word-break: keep-all;
+    }
+
+    /* ── Screen shell ── */
+    .dashboard-screen {
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      flex-shrink: 0;
+    }
+    .header-greeting {
+      display: flex;
+      flex-direction: column;
+    }
+    .greeting-label {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+    .greeting-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border-subtle);
+      background: transparent;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color var(--duration-fast) var(--ease-gentle);
+    }
+    .icon-btn:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+    .icon-btn svg { width: 18px; height: 18px; }
+    .profile-avatar {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 15px;
+      color: var(--accent-primary);
+    }
+
+    /* ── Scrollable content ── */
+    .dashboard-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 24px 24px;
+    }
+    .dashboard-content::-webkit-scrollbar { width: 4px; }
+    .dashboard-content::-webkit-scrollbar-track { background: transparent; }
+    .dashboard-content::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 100px; }
+
+    /* ── Section ── */
+    .section { margin-bottom: 32px; }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+    }
+    .section-action {
+      font-size: 12px;
+      color: var(--accent-primary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
+
+    /* ── Relationship score card ── */
+    .score-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .score-card::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, color-mix(in srgb, var(--accent-primary) 8%, transparent) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .score-label {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+      margin-bottom: 16px;
+    }
+    .score-ring {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    .score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .score-ring-track {
+      fill: none;
+      stroke: var(--border-subtle);
+      stroke-width: 6;
+    }
+    .score-ring-fill {
+      fill: none;
+      stroke: var(--accent-primary);
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-dasharray: 295;
+      stroke-dashoffset: 73;
+      transition: stroke-dashoffset 0.8s var(--ease-gentle);
+    }
+    .score-number {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .score-value {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+    .score-unit {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 2px;
+    }
+    .score-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .score-desc {
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--accent-primary);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.4;
+    }
+
+    /* ── Weekly chart ── */
+    .chart-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .chart-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .chart-legend {
+      display: flex;
+      gap: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .legend-dot.accent { background: var(--accent-primary); }
+    .legend-dot.muted { background: var(--border-strong); }
+
+    /* Simple bar chart */
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 80px;
+      padding-bottom: 24px;
+      position: relative;
+    }
+    .bar-chart::after {
+      content: '';
+      position: absolute;
+      bottom: 22px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+    .bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      transition: height 0.4s var(--ease-gentle);
+    }
+    .bar.primary { background: var(--accent-primary); }
+    .bar.secondary { background: var(--border-strong); }
+    .bar-day {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      text-align: center;
+    }
+
+    /* ── Insights cards ── */
+    .insights-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .insight-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      gap: 14px;
+      transition: border-color var(--duration-fast) var(--ease-gentle);
+    }
+    .insight-card:hover { border-color: var(--border-strong); }
+    .insight-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 10px;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-primary);
+      font-size: 18px;
+    }
+    .insight-body { flex: 1; }
+    .insight-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .insight-text {
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+    .insight-badge {
+      font-size: 10px;
+      color: var(--accent-primary);
+      background: var(--accent-soft);
+      border-radius: 100px;
+      padding: 2px 8px;
+      margin-top: 8px;
+      display: inline-flex;
+    }
+
+    /* ── Check-in banner ── */
+    .checkin-banner {
+      background: var(--accent-soft);
+      border: 1px solid color-mix(in srgb, var(--accent-primary) 30%, transparent);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .checkin-icon {
+      font-size: 28px;
+      color: var(--accent-primary);
+      flex-shrink: 0;
+    }
+    .checkin-body { flex: 1; }
+    .checkin-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent-primary);
+      margin-bottom: 4px;
+    }
+    .checkin-sub {
+      font-size: 12px;
+      color: color-mix(in srgb, var(--accent-primary) 70%, transparent);
+    }
+    .checkin-btn {
+      min-height: 36px;
+      padding: 0 16px;
+      background: var(--accent-primary);
+      color: var(--bg-base);
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--font-body);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: filter var(--duration-fast) var(--ease-gentle);
+    }
+    .checkin-btn:hover { filter: brightness(1.08); }
+
+    /* ── Dimension bars ── */
+    .dimension-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .dimension-row {}
+    .dimension-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .dimension-name {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .dimension-score {
+      font-size: 13px;
+      color: var(--accent-primary);
+    }
+    .dimension-track {
+      height: 4px;
+      background: var(--border-subtle);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .dimension-fill {
+      height: 100%;
+      background: var(--accent-primary);
+      border-radius: 100px;
+      transition: width 0.6s var(--ease-gentle);
+    }
+
+    /* ── Bottom nav ── */
+    .nav-bottom {
+      display: flex;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-base);
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      flex-shrink: 0;
+    }
+    .nav-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 12px 0;
+      min-height: 56px;
+      color: var(--text-tertiary);
+      font-size: 10px;
+      font-family: var(--font-body);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    .nav-tab.active { color: var(--accent-primary); }
+    .nav-tab svg { width: 22px; height: 22px; stroke: currentColor; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-screen">
+
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="header-greeting">
+        <span class="greeting-label">2026년 4월 6일 월요일</span>
+        <h1 class="greeting-title">안녕하세요, 지수님</h1>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn" onclick="toggleTheme()" aria-label="테마 전환">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" /></svg>
+        </button>
+        <div class="profile-avatar" aria-label="내 프로필">지</div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="dashboard-content">
+
+      <!-- Daily check-in nudge -->
+      <div class="section">
+        <div class="checkin-banner">
+          <div class="checkin-icon">✦</div>
+          <div class="checkin-body">
+            <div class="checkin-title">오늘의 감정 체크인</div>
+            <div class="checkin-sub">오늘 기분이 어떠세요?</div>
+          </div>
+          <button class="checkin-btn" onclick="location.href='chat.html'">시작</button>
+        </div>
+      </div>
+
+      <!-- Relationship score -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">관계 점수</span>
+          <button class="section-action">자세히 →</button>
+        </div>
+        <div class="score-card">
+          <div class="score-label">이번 주 관계 건강도</div>
+          <div class="score-ring" aria-label="관계 점수 75점">
+            <svg viewBox="0 0 120 120">
+              <circle class="score-ring-track" cx="60" cy="60" r="47" />
+              <circle class="score-ring-fill" cx="60" cy="60" r="47" />
+            </svg>
+            <div class="score-number">
+              <span class="score-value">75</span>
+              <span class="score-unit">/ 100</span>
+            </div>
+          </div>
+          <div class="score-title">따뜻하게 성장 중</div>
+          <p class="score-desc">지난 주보다 8점 올랐어요. 대화 빈도가 높아졌고, 감정 표현도 더 솔직해지고 있습니다.</p>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-value">12</div>
+            <div class="stat-label">이번 주<br>대화 횟수</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">14일</div>
+            <div class="stat-label">연속<br>체크인</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">3개</div>
+            <div class="stat-label">완료한<br>설문</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly mood chart -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">주간 감정 흐름</span>
+          <button class="section-action">이번 달 →</button>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <span class="chart-title">감정 온도 추이</span>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-dot accent"></div>
+                지수
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot muted"></div>
+                민준
+              </div>
+            </div>
+          </div>
+          <div class="bar-chart" aria-hidden="true">
+            <div class="bar-col">
+              <div class="bar primary" style="height:45%"></div>
+              <span class="bar-day">월</span>
+            </div>
+            <div class="bar-col">
+              <div class="bar primary" style="height:60%"></div>
+              <span class="bar-day">화</span>
+            </div>
+            <div class="bar-col">
+              <div class="bar primary" style="height:50%"></div>
+              <span class="bar-day">수</span>
+            </div>
+            <div class="bar-col">
+              <div class="bar primary" style="height:72%"></div>
+              <span class="bar-day">목</span>
+            </div>
+            <div class="bar-col">
+              <div class="bar primary" style="height:68%"></div>
+              <span class="bar-day">금</span>
+            </div>
+            <div class="bar-col">
+              <div class="bar primary" style="height:80%"></div>
+              <span class="bar-day">토</span>
+            </div>
+            <div class="bar-col">
+              <div class="bar primary" style="height:75%;opacity:0.5;"></div>
+              <span class="bar-day" style="color:var(--accent-primary);">일</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Relationship dimensions -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">관계 차원 분석</span>
+        </div>
+        <div class="chart-card">
+          <div class="dimension-list">
+            <div class="dimension-row">
+              <div class="dimension-meta">
+                <span class="dimension-name">소통</span>
+                <span class="dimension-score">82</span>
+              </div>
+              <div class="dimension-track"><div class="dimension-fill" style="width:82%"></div></div>
+            </div>
+            <div class="dimension-row">
+              <div class="dimension-meta">
+                <span class="dimension-name">신뢰</span>
+                <span class="dimension-score">76</span>
+              </div>
+              <div class="dimension-track"><div class="dimension-fill" style="width:76%"></div></div>
+            </div>
+            <div class="dimension-row">
+              <div class="dimension-meta">
+                <span class="dimension-name">친밀감</span>
+                <span class="dimension-score">71</span>
+              </div>
+              <div class="dimension-track"><div class="dimension-fill" style="width:71%"></div></div>
+            </div>
+            <div class="dimension-row">
+              <div class="dimension-meta">
+                <span class="dimension-name">갈등 해결</span>
+                <span class="dimension-score">58</span>
+              </div>
+              <div class="dimension-track"><div class="dimension-fill" style="width:58%"></div></div>
+            </div>
+            <div class="dimension-row">
+              <div class="dimension-meta">
+                <span class="dimension-name">공유 활동</span>
+                <span class="dimension-score">64</span>
+              </div>
+              <div class="dimension-track"><div class="dimension-fill" style="width:64%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insights -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">이번 주 인사이트</span>
+        </div>
+        <div class="insights-grid">
+          <div class="insight-card">
+            <div class="insight-icon">◎</div>
+            <div class="insight-body">
+              <div class="insight-title">저녁 시간대 대화가 늘었어요</div>
+              <p class="insight-text">오후 9–11시 사이의 대화가 지난 주 대비 40% 증가했습니다. 저녁 루틴이 안정되는 것 같습니다.</p>
+              <span class="insight-badge">소통 개선</span>
+            </div>
+          </div>
+          <div class="insight-card">
+            <div class="insight-icon">◇</div>
+            <div class="insight-body">
+              <div class="insight-title">갈등 해결 방식을 연습해 볼 시간</div>
+              <p class="insight-text">갈등 해결 점수가 다른 영역보다 낮습니다. 관련 설문을 완료하면 맞춤 조언을 드릴 수 있어요.</p>
+              <span class="insight-badge">개선 제안</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom nav -->
+    <nav class="nav-bottom" aria-label="하단 메뉴">
+      <button class="nav-tab active" aria-current="page" aria-label="홈">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+        홈
+      </button>
+      <button class="nav-tab" aria-label="상담" onclick="location.href='chat.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+        상담
+      </button>
+      <button class="nav-tab" aria-label="설문" onclick="location.href='survey.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" /></svg>
+        설문
+      </button>
+      <button class="nav-tab" aria-label="분석">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>
+        분석
+      </button>
+    </nav>
+
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+  </script>
+</body>
+</html>

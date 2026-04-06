@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>부부상담 — 로그인 / 회원가입</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <style>
+    :root {
+      --bg-base: #1A1714;
+      --bg-surface: #23201C;
+      --bg-elevated: #2D2924;
+      --text-primary: #F4EFE6;
+      --text-secondary: #B8AE9E;
+      --text-tertiary: #7A7268;
+      --accent-primary: #D4A574;
+      --accent-soft: #3A3129;
+      --border-subtle: #332E28;
+      --border-strong: #4A4339;
+      --state-gentle-error: #B87060;
+      --font-display: "Noto Serif KR", Georgia, serif;
+      --font-body: "Pretendard Variable", "Pretendard", -apple-system, sans-serif;
+      --ease-gentle: cubic-bezier(0.25, 0.1, 0.25, 1);
+      --duration-base: 250ms;
+      --duration-fast: 150ms;
+    }
+    [data-theme="light"] {
+      --bg-base: #FAF7F0;
+      --bg-surface: #F4EFE4;
+      --bg-elevated: #EDE6D6;
+      --text-primary: #2B2420;
+      --text-secondary: #5C524A;
+      --text-tertiary: #8B8176;
+      --accent-primary: #A67A42;
+      --accent-soft: #EBE0CC;
+      --border-subtle: #E5DCC9;
+      --border-strong: #C9BDA5;
+      --state-gentle-error: #9B5445;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      word-break: keep-all;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    button { cursor: pointer; font-family: var(--font-body); }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Auth card wrapper ── */
+    .auth-wrapper {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    /* ── Header ── */
+    .auth-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .auth-logo {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      letter-spacing: -0.01em;
+    }
+    .auth-logo span { color: var(--accent-primary); }
+    .auth-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+    .auth-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ── Tab switcher ── */
+    .auth-tabs {
+      display: flex;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 32px;
+      gap: 4px;
+    }
+    .auth-tab {
+      flex: 1;
+      min-height: 40px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-tertiary);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: var(--font-body);
+      transition: background var(--duration-base) var(--ease-gentle),
+                  color var(--duration-base) var(--ease-gentle);
+    }
+    .auth-tab.active {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    /* ── Form ── */
+    .auth-form { display: flex; flex-direction: column; gap: 20px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+    }
+    .form-input {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 16px;
+      outline: none;
+      transition: border-color var(--duration-fast) var(--ease-gentle),
+                  box-shadow var(--duration-fast) var(--ease-gentle);
+    }
+    .form-input::placeholder { color: var(--text-tertiary); }
+    .form-input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    }
+    .form-input.error {
+      border-color: var(--state-gentle-error);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--state-gentle-error) 20%, transparent);
+    }
+    .form-error {
+      font-size: 13px;
+      color: var(--state-gentle-error);
+      line-height: 1.5;
+    }
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+    }
+
+    /* Password visibility toggle */
+    .input-wrapper {
+      position: relative;
+    }
+    .input-wrapper .form-input {
+      padding-right: 48px;
+    }
+    .input-eye {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: var(--text-tertiary);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .input-eye:hover { color: var(--text-secondary); }
+    .input-eye svg { width: 18px; height: 18px; }
+
+    /* ── Checkbox ── */
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .checkbox-input {
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
+      background: var(--bg-elevated);
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      margin-top: 1px;
+      position: relative;
+      transition: border-color var(--duration-fast) var(--ease-gentle),
+                  background var(--duration-fast) var(--ease-gentle);
+    }
+    .checkbox-input:checked {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+    .checkbox-input:checked::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      width: 5px;
+      height: 9px;
+      border: 2px solid var(--bg-base);
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg);
+    }
+    .checkbox-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      cursor: pointer;
+    }
+    .checkbox-label a {
+      color: var(--accent-primary);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* ── Submit button ── */
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 52px;
+      background: var(--accent-primary);
+      color: var(--bg-base);
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 8px;
+      border: none;
+      margin-top: 4px;
+      transition: filter var(--duration-fast) var(--ease-gentle),
+                  transform var(--duration-fast) var(--ease-gentle);
+    }
+    .btn-primary:hover { filter: brightness(1.08); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ── Divider ── */
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-tertiary);
+      font-size: 12px;
+      margin: 4px 0;
+    }
+    .or-divider::before,
+    .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    /* ── Social login ── */
+    .btn-social {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 48px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      transition: border-color var(--duration-fast) var(--ease-gentle),
+                  color var(--duration-fast) var(--ease-gentle);
+    }
+    .btn-social:hover {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+    .btn-social svg { width: 20px; height: 20px; }
+
+    /* ── Footer note ── */
+    .auth-footer-note {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-top: 28px;
+      line-height: 1.6;
+    }
+    .auth-footer-note a {
+      color: var(--accent-primary);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* ── Theme toggle ── */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border-subtle);
+      background: transparent;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    /* ── Panels (login vs signup) ── */
+    .auth-panel { display: none; }
+    .auth-panel.active { display: flex; flex-direction: column; gap: 20px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">☽</button>
+
+  <div class="auth-wrapper">
+    <!-- Header -->
+    <div class="auth-header">
+      <div class="auth-logo">우리<span>.</span></div>
+      <h1 class="auth-title" id="auth-title">다시 만나서 반가워요</h1>
+      <p class="auth-subtitle" id="auth-subtitle">오늘도 함께하는 시간을 시작해 봐요.</p>
+    </div>
+
+    <!-- Tab switcher -->
+    <div class="auth-tabs" role="tablist">
+      <button class="auth-tab active" role="tab" aria-selected="true" onclick="switchTab('login', this)">로그인</button>
+      <button class="auth-tab" role="tab" aria-selected="false" onclick="switchTab('signup', this)">회원가입</button>
+    </div>
+
+    <!-- Login Panel -->
+    <form class="auth-form auth-panel active" id="panel-login" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="login-email">이메일</label>
+        <input class="form-input" type="email" id="login-email" placeholder="hello@example.com" autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="login-password">비밀번호</label>
+        <div class="input-wrapper">
+          <input class="form-input" type="password" id="login-password" placeholder="비밀번호를 입력하세요" autocomplete="current-password" />
+          <button type="button" class="input-eye" aria-label="비밀번호 보기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+          </button>
+        </div>
+        <a href="#" style="font-size:12px; color:var(--text-tertiary); align-self:flex-end; text-decoration:underline; text-underline-offset:2px;">비밀번호를 잊으셨나요?</a>
+      </div>
+
+      <button type="submit" class="btn-primary">로그인</button>
+
+      <div class="or-divider">또는</div>
+
+      <button type="button" class="btn-social">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 11h8.533c.044.385.067.78.067 1.185 0 3.11-.884 5.567-2.35 7.26C16.79 21.142 14.857 22 12 22 6.477 22 2 17.523 2 12S6.477 2 12 2c2.69 0 4.923.972 6.64 2.546l-2.696 2.596C14.87 6.106 13.56 5.5 12 5.5 8.41 5.5 5.5 8.41 5.5 12s2.91 6.5 6.5 6.5c2.464 0 4.08-.877 5.045-2.282H12V11Z" fill="currentColor"/></svg>
+        Google로 계속하기
+      </button>
+    </form>
+
+    <!-- Signup Panel -->
+    <form class="auth-form auth-panel" id="panel-signup" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="signup-name">이름</label>
+        <input class="form-input" type="text" id="signup-name" placeholder="이름을 입력하세요" autocomplete="name" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="signup-email">이메일</label>
+        <input class="form-input" type="email" id="signup-email" placeholder="hello@example.com" autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="signup-password">비밀번호</label>
+        <div class="input-wrapper">
+          <input class="form-input" type="password" id="signup-password" placeholder="8자 이상 입력하세요" autocomplete="new-password" />
+          <button type="button" class="input-eye" aria-label="비밀번호 보기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+          </button>
+        </div>
+        <span class="form-hint">영문, 숫자를 포함한 8자 이상</span>
+      </div>
+
+      <!-- Partner invite (optional) -->
+      <div class="form-group" style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:10px; padding:16px; gap:12px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span style="font-size:13px; color:var(--accent-primary); background:var(--accent-soft); padding:2px 8px; border-radius:100px;">선택</span>
+          <span style="font-size:13px; font-weight:500; color:var(--text-primary);">파트너 초대</span>
+        </div>
+        <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:4px;">함께할 파트너의 이메일을 입력하면 초대 메일을 보내드립니다. 나중에 하셔도 됩니다.</p>
+        <input class="form-input" type="email" placeholder="파트너 이메일 (선택사항)" autocomplete="off" />
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" class="checkbox-input" id="agree-terms" />
+        <label class="checkbox-label" for="agree-terms">
+          <a href="#">이용약관</a> 및 <a href="#">개인정보처리방침</a>에 동의합니다.
+        </label>
+      </div>
+
+      <button type="submit" class="btn-primary">가입하기</button>
+
+      <div class="or-divider">또는</div>
+
+      <button type="button" class="btn-social">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 11h8.533c.044.385.067.78.067 1.185 0 3.11-.884 5.567-2.35 7.26C16.79 21.142 14.857 22 12 22 6.477 22 2 17.523 2 12S6.477 2 12 2c2.69 0 4.923.972 6.64 2.546l-2.696 2.596C14.87 6.106 13.56 5.5 12 5.5 8.41 5.5 5.5 8.41 5.5 12s2.91 6.5 6.5 6.5c2.464 0 4.08-.877 5.045-2.282H12V11Z" fill="currentColor"/></svg>
+        Google로 시작하기
+      </button>
+    </form>
+
+    <p class="auth-footer-note" id="auth-switch-note">
+      아직 계정이 없으신가요? <a href="#" onclick="switchTab('signup', null); return false;">가입하기</a>
+    </p>
+  </div>
+
+  <script>
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.auth-tab').forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+
+      const activePanel = document.getElementById('panel-' + tab);
+      activePanel.classList.add('active');
+
+      if (btn) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+      } else {
+        document.querySelectorAll('.auth-tab')[tab === 'signup' ? 1 : 0].classList.add('active');
+      }
+
+      if (tab === 'login') {
+        document.getElementById('auth-title').textContent = '다시 만나서 반가워요';
+        document.getElementById('auth-subtitle').textContent = '오늘도 함께하는 시간을 시작해 봐요.';
+        document.getElementById('auth-switch-note').innerHTML = '아직 계정이 없으신가요? <a href="#" onclick="switchTab(\'signup\', null); return false;">가입하기</a>';
+      } else {
+        document.getElementById('auth-title').textContent = '처음 오셨군요';
+        document.getElementById('auth-subtitle').textContent = '우리 둘만의 조용한 공간을 만들어 드릴게요.';
+        document.getElementById('auth-switch-note').innerHTML = '이미 계정이 있으신가요? <a href="#" onclick="switchTab(\'login\', null); return false;">로그인</a>';
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+      document.querySelector('.theme-toggle').textContent = current === 'dark' ? '☀' : '☽';
+    }
+  </script>
+</body>
+</html>
