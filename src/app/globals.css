@@ -616,6 +616,31 @@
     @apply cursor-not-allowed;
   }
 
+  /* Typing indicator — gentle pulse, no bounce */
+  .chat-typing-bubble {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px 16px 16px 4px;
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .chat-typing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-tertiary);
+    animation: typing-pulse var(--duration-ambient) var(--ease-gentle) infinite;
+  }
+  @keyframes typing-pulse {
+    0%, 100% { opacity: 0.3; transform: translateY(0); }
+    50%       { opacity: 0.9; transform: translateY(-3px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chat-typing-dot { animation: none; opacity: 0.6; }
+  }
+
   /* TTS toggle */
   .chat-tts-toggle-wrap {
     display: flex;
