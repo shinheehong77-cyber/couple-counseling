@@ -1,7 +1,7 @@
 "use client";
 
-import type { SurveyResult, ScoreLevel, SurveyDomain } from "../types";
-import { DOMAIN_LABELS, SCORE_LEVEL_LABELS } from "../types";
+import type { SurveyResult, ScoreLevel, SurveyDomain, SurveyCategory } from "../types";
+import { DOMAIN_LABELS, SCORE_LEVEL_LABELS, DOMAIN_CATEGORY, CATEGORY_LABELS } from "../types";
 import { useRouter } from "next/navigation";
 
 interface Props {
@@ -51,7 +51,7 @@ export default function ResultsSummary({ result, onStartCounseling }: Props) {
       } catch {
         // ignore
       }
-      router.push("/chat");
+      router.push("/counseling");
     }
   }
 
@@ -80,33 +80,49 @@ export default function ResultsSummary({ result, onStartCounseling }: Props) {
         </div>
       )}
 
-      {/* 도메인 점수 */}
+      {/* 도메인 점수 — 카테고리별 그룹 */}
       <div className="results-domains">
-        <h3 className="results-section-title">영역별 점수</h3>
-        {domainScores.map((d) => (
-          <div key={d.domain} className="domain-row">
-            <div className="domain-row-top">
-              <span className="domain-name">{DOMAIN_LABELS[d.domain as SurveyDomain]}</span>
-              <span className="domain-score">{d.score}점</span>
+        {(["relationship", "personality"] as SurveyCategory[]).map((category) => {
+          const categoryScores = domainScores.filter(
+            (d) => DOMAIN_CATEGORY[d.domain as SurveyDomain] === category
+          );
+          if (categoryScores.length === 0) return null;
+          return (
+            <div key={category} className="results-category-group">
+              <h3 className="results-section-title">
+                {CATEGORY_LABELS[category]}
+              </h3>
+              {categoryScores.map((d) => (
+                <div key={d.domain} className="domain-row">
+                  <div className="domain-row-top">
+                    <span className="domain-name">
+                      {DOMAIN_LABELS[d.domain as SurveyDomain]}
+                    </span>
+                    <span className="domain-score">{d.score}점</span>
+                  </div>
+                  <div className="domain-bar-bg">
+                    <div
+                      className="domain-bar-fill"
+                      style={{
+                        width: `${d.score}%`,
+                        backgroundColor: LEVEL_COLORS[d.level],
+                      }}
+                    />
+                  </div>
+                  <span className="domain-level-label">
+                    {SCORE_LEVEL_LABELS[d.level]}
+                  </span>
+                </div>
+              ))}
             </div>
-            <div className="domain-bar-bg">
-              <div
-                className="domain-bar-fill"
-                style={{
-                  width: `${d.score}%`,
-                  backgroundColor: LEVEL_COLORS[d.level],
-                }}
-              />
-            </div>
-            <span className="domain-level-label">{SCORE_LEVEL_LABELS[d.level]}</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* 강점 / 개선 영역 */}
       {aiContextPayload.strengths.length > 0 && (
         <div className="results-section results-strengths">
-          <h3 className="results-section-title">💪 강점 영역</h3>
+          <h3 className="results-section-title">강점 영역</h3>
           <div className="results-tag-list">
             {aiContextPayload.strengths.map((d) => (
               <span key={d} className="results-tag results-tag--strength">
@@ -119,7 +135,7 @@ export default function ResultsSummary({ result, onStartCounseling }: Props) {
 
       {aiContextPayload.concerns.length > 0 && (
         <div className="results-section results-concerns">
-          <h3 className="results-section-title">🔍 개선이 필요한 영역</h3>
+          <h3 className="results-section-title">개선이 필요한 영역</h3>
           <div className="results-tag-list">
             {aiContextPayload.concerns.map((d) => (
               <span key={d} className="results-tag results-tag--concern">

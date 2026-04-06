@@ -615,6 +615,563 @@
     background: var(--border-strong);
     @apply cursor-not-allowed;
   }
+
+  /* TTS toggle */
+  .chat-tts-toggle-wrap {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 var(--space-4);
+  }
+
+  .chat-tts-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border-subtle);
+    background: transparent;
+    color: var(--text-tertiary);
+    font-family: var(--font-body);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-gentle);
+  }
+
+  .chat-tts-toggle--active {
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background: var(--accent-soft);
+  }
+
+  .chat-tts-label {
+    font-weight: 500;
+  }
+}
+
+/* ===================================================
+   COUNSELING MODE SELECTION PAGE
+   Per DESIGN_SYSTEM.md — warm editorial, card-based
+   =================================================== */
+
+.counseling-select {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  background: var(--bg-base);
+}
+
+.counseling-select-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.counseling-select-title {
+  font-family: var(--font-display, "Noto Serif KR", serif);
+  font-size: var(--text-2xl, 28px);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.counseling-select-subtitle {
+  font-family: var(--font-body, "Pretendard", sans-serif);
+  font-size: var(--text-base, 16px);
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.counseling-mode-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 480px;
+}
+
+@media (min-width: 640px) {
+  .counseling-mode-cards {
+    flex-direction: row;
+    max-width: 680px;
+  }
+}
+
+.counseling-mode-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--duration-base) var(--ease-gentle),
+              background var(--duration-base) var(--ease-gentle);
+}
+
+.counseling-mode-card:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-elevated);
+}
+
+.counseling-mode-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent-primary);
+}
+
+.counseling-mode-name {
+  font-family: var(--font-display, "Noto Serif KR", serif);
+  font-size: var(--text-lg, 18px);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.counseling-mode-desc {
+  font-family: var(--font-body, "Pretendard", sans-serif);
+  font-size: var(--text-sm, 14px);
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.counseling-mode-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.counseling-mode-features li {
+  font-family: var(--font-body, "Pretendard", sans-serif);
+  font-size: 13px;
+  color: var(--text-tertiary);
+  padding-left: 16px;
+  position: relative;
+}
+
+.counseling-mode-features li::before {
+  content: "·";
+  position: absolute;
+  left: 4px;
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+/* ===================================================
+   LANDING PAGE — Warm Editorial / Dark Mode
+   Per DESIGN_SYSTEM.md §2 Tone, §3 Colors, §4 Typography
+   =================================================== */
+@layer components {
+
+  .landing-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    word-break: keep-all;
+  }
+
+  /* ── Navigation ── */
+  .landing-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-6);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .landing-wordmark {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+
+  .landing-nav-login {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    transition: border-color var(--duration-fast) var(--ease-gentle),
+                color var(--duration-fast) var(--ease-gentle);
+  }
+
+  .landing-nav-login:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+  }
+
+  /* ── Hero ── */
+  .landing-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-24) var(--space-6);
+    min-height: 70dvh;
+    overflow: hidden;
+  }
+
+  .landing-hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+  }
+
+  .landing-ornament {
+    font-size: 1.25rem;
+    color: var(--accent-primary);
+    opacity: 0.5;
+    margin-bottom: var(--space-6);
+  }
+
+  .landing-headline {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-6);
+  }
+
+  .landing-headline em {
+    font-style: normal;
+    color: var(--accent-primary);
+  }
+
+  .landing-subheadline {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: var(--space-12);
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .landing-br-desktop {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .landing-br-desktop {
+      display: inline;
+    }
+  }
+
+  /* Primary CTA button — §6 Buttons */
+  .landing-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: var(--space-4) var(--space-8);
+    background: var(--accent-primary);
+    color: var(--bg-base);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 500;
+    border-radius: 8px;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    transition: filter var(--duration-fast) var(--ease-gentle),
+                transform var(--duration-fast) var(--ease-gentle);
+  }
+
+  .landing-cta-btn:hover {
+    filter: brightness(1.08);
+  }
+
+  .landing-cta-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* Secondary CTA */
+  .landing-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: var(--space-3) var(--space-6);
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 500;
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color var(--duration-fast) var(--ease-gentle),
+                color var(--duration-fast) var(--ease-gentle);
+  }
+
+  .landing-cta-secondary:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+  }
+
+  /* Ambient circles — subtle background texture per §8 Imagery */
+  .landing-hero-ambient {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .landing-ambient-circle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.04;
+  }
+
+  .landing-ambient-circle--1 {
+    width: 600px;
+    height: 600px;
+    background: var(--accent-primary);
+    top: -30%;
+    left: -10%;
+  }
+
+  .landing-ambient-circle--2 {
+    width: 400px;
+    height: 400px;
+    background: var(--accent-primary);
+    bottom: -20%;
+    right: -5%;
+  }
+
+  /* ── Section divider ── */
+  .landing-section-rule {
+    border: none;
+    border-top: 1px solid var(--border-subtle);
+    margin: 0 var(--space-6);
+  }
+
+  /* ── Sections ── */
+  .landing-section {
+    padding: var(--space-24) var(--space-6);
+  }
+
+  .landing-section-inner {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .landing-section-label {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--accent-primary);
+    letter-spacing: 0.04em;
+    margin-bottom: var(--space-3);
+  }
+
+  .landing-section-heading {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin-bottom: var(--space-12);
+  }
+
+  /* ── Steps (How it works) ── */
+  .landing-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    counter-reset: none;
+  }
+
+  .landing-step {
+    display: flex;
+    gap: var(--space-6);
+    align-items: flex-start;
+  }
+
+  .landing-step-num {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 500;
+    color: var(--accent-primary);
+    opacity: 0.4;
+    line-height: 1;
+    flex-shrink: 0;
+    min-width: 36px;
+    padding-top: 2px;
+  }
+
+  .landing-step-body {
+    flex: 1;
+  }
+
+  .landing-step-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: var(--space-2);
+  }
+
+  .landing-step-desc {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* ── Feature cards ── */
+  .landing-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 768px) {
+    .landing-features {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .landing-feature-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .landing-feature-icon {
+    color: var(--accent-primary);
+    flex-shrink: 0;
+  }
+
+  .landing-feature-title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.4;
+  }
+
+  .landing-feature-desc {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* ── Bottom CTA ── */
+  .landing-bottom-cta {
+    padding: var(--space-24) var(--space-6);
+    text-align: center;
+  }
+
+  .landing-bottom-cta-inner {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .landing-bottom-cta-heading {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin-bottom: var(--space-4);
+  }
+
+  .landing-bottom-cta-desc {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: var(--space-8);
+  }
+
+  .landing-bottom-cta-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: center;
+  }
+
+  @media (min-width: 480px) {
+    .landing-bottom-cta-actions {
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
+
+  /* ── Footer ── */
+  .landing-footer {
+    border-top: 1px solid var(--border-subtle);
+    padding: var(--space-6);
+    text-align: center;
+  }
+
+  .landing-footer-copy {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    line-height: 1.6;
+  }
+
+  /* ── Mobile-first responsive ── */
+  @media (max-width: 480px) {
+    .landing-headline {
+      font-size: var(--text-3xl);
+    }
+
+    .landing-subheadline {
+      font-size: var(--text-base);
+    }
+
+    .landing-hero {
+      padding: var(--space-16) var(--space-4);
+      min-height: 60dvh;
+    }
+
+    .landing-section {
+      padding: var(--space-16) var(--space-4);
+    }
+
+    .landing-section-heading {
+      font-size: var(--text-xl);
+    }
+  }
 }
 
 /* Respect reduced motion */
@@ -908,6 +1465,35 @@
     color: var(--survey-text-3);
     padding: var(--space-2) var(--space-5) 0;
     letter-spacing: 0.04em;
+  }
+
+  /* Category transition header */
+  .survey-category-header {
+    text-align: center;
+    padding: var(--space-4) var(--space-5);
+    max-width: 540px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .survey-category-label {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--accent-primary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 4px 16px;
+  }
+
+  .survey-category-desc {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-top: var(--space-2);
+    line-height: 1.6;
   }
 
   /* The question card area */
@@ -1389,6 +1975,18 @@
     max-width: 540px;
     width: 100%;
     margin: 0 auto;
+  }
+
+  .results-category-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .results-category-group + .results-category-group {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-subtle);
   }
 
   .results-section-title {

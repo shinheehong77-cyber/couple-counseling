@@ -7,7 +7,8 @@ import SurveyTypeSelector from "@/lib/survey/components/SurveyTypeSelector";
 import SurveyPage from "@/lib/survey/components/SurveyPage";
 import ResultsSummary from "@/lib/survey/components/ResultsSummary";
 import { useSurveySession } from "@/lib/survey/hooks/useSurveySession";
-import { briefSurvey } from "@/lib/survey/data/brief";
+import { briefSurveyFull } from "@/lib/survey/data/brief";
+import { comprehensiveSurveyFull } from "@/lib/survey/data/comprehensive";
 
 type AppPhase = "select" | "survey" | "results";
 
@@ -21,7 +22,7 @@ export default function SurveyRootPage() {
 
   async function handleSelectVersion(version: SurveyVersion) {
     setSelectedVersion(version);
-    const qs = version === "brief" ? briefSurvey : briefSurvey; // comprehensive TBD
+    const qs = version === "brief" ? briefSurveyFull : comprehensiveSurveyFull;
     setQuestions(qs);
     await session.startSurvey(qs);
     setAppPhase("survey");
@@ -44,7 +45,7 @@ export default function SurveyRootPage() {
   }
 
   function handleSkip() {
-    router.push("/chat");
+    router.push("/counseling");
   }
 
   if (appPhase === "select") {

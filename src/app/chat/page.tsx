@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { Suspense, useState, useRef, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+import { Volume2, VolumeX } from "lucide-react";
 import ChatHeader from "@/components/ChatHeader";
 import ChatWelcome from "@/components/ChatWelcome";
 import MessageBubble from "@/components/MessageBubble";
@@ -19,12 +21,45 @@ interface EmotionData {
   intensity: number;
 }
 
+/** TTS 음성 재생 (Web Speech API) */
+function speakText(text: string) {
+  if (typeof window === "undefined" || !window.speechSynthesis) return;
+  // 이전 음성 중지
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "ko-KR";
+  utterance.rate = 0.9; // 약간 느리게 — 편안한 상담 톤
+  utterance.pitch = 1.0;
+
+  // 한국어 음성 선택 (가능한 경우)
+  const voices = window.speechSynthesis.getVoices();
+  const koVoice = voices.find(
+    (v) => v.lang === "ko-KR" && v.name.includes("여")
+  ) ?? voices.find((v) => v.lang.startsWith("ko"));
+  if (koVoice) utterance.voice = koVoice;
+
+  window.speechSynthesis.speak(utterance);
+}
+
 export default function ChatPage() {
+  return (
+    <Suspense fallback={<div className="chat-screen" />}>
+      <ChatPageInner />
+    </Suspense>
+  );
+}
+
+function ChatPageInner() {
+  const searchParams = useSearchParams();
+  const isVoiceMode = searchParams.get("mode") === "voice";
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [latestEmotion, setLatestEmotion] = useState<EmotionData | null>(null);
+  const [ttsEnabled, setTtsEnabled] = useState(isVoiceMode);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -110,6 +145,7 @@ export default function ChatPage() {
               }),
             },
           ]);
+          if (ttsEnabled) speakText(data.content);
           setIsLoading(false);
           return;
         }
@@ -186,6 +222,14 @@ export default function ChatPage() {
               // parse failed
             }
           }
+
+          // TTS: 스트리밍 완료 후 전체 응답 음성 재생
+          if (ttsEnabled && assistantContent) {
+            const cleanContent = assistantContent
+              .replace(/<!-- EMOTION:.*? -->/g, "")
+              .trim();
+            if (cleanContent) speakText(cleanContent);
+          }
         }
       } catch {
         // network error
@@ -194,7 +238,7 @@ export default function ChatPage() {
         inputRef.current?.focus();
       }
     },
-    [sessionId, isLoading]
+    [sessionId, isLoading, ttsEnabled]
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -207,6 +251,28 @@ export default function ChatPage() {
   return (
     <div className="chat-screen">
       <ChatHeader counselorName={counselorName} />
+
+      {/* TTS 토글 (음성 모드일 때 표시, 항상 토글 가능) */}
+      <div className="chat-tts-toggle-wrap">
+        <button
+          type="button"
+          className={`chat-tts-toggle ${ttsEnabled ? "chat-tts-toggle--active" : ""}`}
+          onClick={() => {
+            if (ttsEnabled) window.speechSynthesis?.cancel();
+            setTtsEnabled((prev) => !prev);
+          }}
+          aria-label={ttsEnabled ? "음성 끄기" : "음성 켜기"}
+        >
+          {ttsEnabled ? (
+            <Volume2 size={18} strokeWidth={1.5} />
+          ) : (
+            <VolumeX size={18} strokeWidth={1.5} />
+          )}
+          <span className="chat-tts-label">
+            {ttsEnabled ? "음성 켜짐" : "음성 꺼짐"}
+          </span>
+        </button>
+      </div>
 
       {latestEmotion && (
         <EmotionIndicator

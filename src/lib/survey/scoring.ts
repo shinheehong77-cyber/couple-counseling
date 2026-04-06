@@ -19,6 +19,7 @@ import type {
   AIContextPayload,
   CounselingApproach,
 } from './types';
+import { DOMAIN_CATEGORY } from './types';
 
 // ─────────────────────────────────────────────
 // 영역별 가중치 (총합 = 1.0)
@@ -26,12 +27,17 @@ import type {
 // ─────────────────────────────────────────────
 
 export const DOMAIN_WEIGHTS: Record<SurveyDomain, number> = {
-  communication: 0.22,
-  conflict: 0.22,
-  intimacy: 0.20,
-  trust: 0.20,
-  values: 0.10,
-  satisfaction: 0.06,
+  // 관계 영역 (70%)
+  communication: 0.16,
+  conflict: 0.16,
+  intimacy: 0.14,
+  trust: 0.14,
+  values: 0.06,
+  satisfaction: 0.04,
+  // 개인 성격/성향 영역 (30%)
+  attachment_style: 0.12,
+  emotional_regulation: 0.10,
+  self_awareness: 0.08,
 };
 
 // ─────────────────────────────────────────────
@@ -308,12 +314,25 @@ export function buildAIPromptContext(result: SurveyResult): string {
   const { aiContextPayload: ctx } = result;
   const interp = SCORE_INTERPRETATION[ctx.totalLevel];
 
-  const domainLines = result.domainScores
-    .map((ds) => {
-      const w = (DOMAIN_WEIGHTS[ds.domain] * 100).toFixed(0);
-      return `  - ${ds.domain} (가중치 ${w}%): ${ds.score}점 (${ds.level})`;
-    })
-    .join('\n');
+  const relationshipScores = result.domainScores.filter(
+    (ds) => DOMAIN_CATEGORY[ds.domain] === 'relationship'
+  );
+  const personalityScores = result.domainScores.filter(
+    (ds) => DOMAIN_CATEGORY[ds.domain] === 'personality'
+  );
+
+  const formatScores = (scores: DomainScore[]) =>
+    scores
+      .map((ds) => {
+        const w = (DOMAIN_WEIGHTS[ds.domain] * 100).toFixed(0);
+        return `  - ${ds.domain} (가중치 ${w}%): ${ds.score}점 (${ds.level})`;
+      })
+      .join('\n');
+
+  const relationshipLines = formatScores(relationshipScores);
+  const personalityLines = personalityScores.length > 0
+    ? formatScores(personalityScores)
+    : '  (개인 성향 설문 미응답)';
 
   const riskLine = ctx.hasRiskFlags
     ? `⚠️ 위험 플래그 감지: ${ctx.riskFlagTypes.join(', ')}`
@@ -333,8 +352,11 @@ export function buildAIPromptContext(result: SurveyResult): string {
 상태 설명: ${interp.description}
 상담 집중 방향: ${interp.counselingFocus}
 
-영역별 점수:
-${domainLines}
+관계 영역 점수:
+${relationshipLines}
+
+개인 성격/성향 점수:
+${personalityLines}
 
 강점 영역: ${ctx.strengths.length > 0 ? ctx.strengths.join(', ') : '없음'}
 취약 영역: ${ctx.concerns.length > 0 ? ctx.concerns.join(', ') : '없음'}

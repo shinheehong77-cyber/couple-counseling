@@ -6,8 +6,9 @@
 export * from './types';
 
 // 데이터
-export { briefSurvey, BRIEF_SURVEY_META } from './data/brief';
-export { comprehensiveSurvey, COMPREHENSIVE_SURVEY_META } from './data/comprehensive';
+export { briefSurvey, briefPersonalitySurvey, briefSurveyFull, BRIEF_SURVEY_META } from './data/brief';
+export { comprehensiveSurvey, comprehensivePersonalitySurvey, comprehensiveSurveyFull, COMPREHENSIVE_SURVEY_META } from './data/comprehensive';
+export { phq9Survey, gad7Survey, rasSurvey, CLINICAL_SURVEY_META } from './data/clinical';
 
 // 점수 계산
 export {

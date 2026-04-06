@@ -1,6 +1,7 @@
 "use client";
 
 import type { SurveyQuestion, QuestionResponse } from "../types";
+import { DOMAIN_CATEGORY, CATEGORY_LABELS } from "../types";
 import LikertQuestion from "./LikertQuestion";
 import VisualSliderQuestion from "./VisualSliderQuestion";
 import ChecklistQuestion from "./ChecklistQuestion";
@@ -23,6 +24,13 @@ export default function SurveyPage({ questions, session, onComplete }: Props) {
 
   const isLast = currentIndex === total - 1;
   const isSubmitting = phase === "submitting";
+
+  // Detect category transition (show header when entering personality section)
+  const currentCategory = DOMAIN_CATEGORY[question.domain];
+  const prevCategory = currentIndex > 0
+    ? DOMAIN_CATEGORY[questions[currentIndex - 1].domain]
+    : null;
+  const showCategoryHeader = currentCategory !== prevCategory;
 
   function getResponseValue(q: SurveyQuestion) {
     const r = currentResponse?.response;
@@ -119,6 +127,20 @@ export default function SurveyPage({ questions, session, onComplete }: Props) {
         {currentIndex + 1} / {total}
       </div>
 
+      {/* 카테고리 전환 헤더 */}
+      {showCategoryHeader && (
+        <div className="survey-category-header">
+          <span className="survey-category-label">
+            {CATEGORY_LABELS[currentCategory]}
+          </span>
+          {currentCategory === "personality" && (
+            <p className="survey-category-desc">
+              이제부터는 나 자신의 성격과 성향에 대한 질문이에요
+            </p>
+          )}
+        </div>
+      )}
+
       {/* 질문 카드 */}
       <div className="survey-card">
         <div className="survey-domain-tag">{getDomainLabel(question.domain)}</div>
@@ -157,6 +179,9 @@ function getDomainLabel(domain: string): string {
     trust: "신뢰 / 안전감",
     values: "가치관 & 목표",
     satisfaction: "관계 만족도",
+    attachment_style: "애착 유형",
+    emotional_regulation: "감정 조절",
+    self_awareness: "자기 인식",
   };
   return labels[domain] ?? domain;
 }

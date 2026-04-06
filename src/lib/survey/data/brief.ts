@@ -14,6 +14,14 @@ const LIKERT_AGREEMENT: [string, string, string, string, string] = [
   '매우 그렇다',
 ];
 
+const LIKERT_FREQUENCY: [string, string, string, string, string] = [
+  '거의 없다',
+  '가끔 있다',
+  '종종 있다',
+  '자주 있다',
+  '매우 자주 있다',
+];
+
 export const briefSurvey: SurveyQuestion[] = [
   // ────────────────────────────────────────
   // 의사소통 패턴 (3문항)
@@ -230,10 +238,131 @@ export const briefSurvey: SurveyQuestion[] = [
   },
 ];
 
+// ────────────────────────────────────────
+// 개인 성격/성향 — 애착 유형 (3문항)
+// ────────────────────────────────────────
+
+export const briefPersonalitySurvey: SurveyQuestion[] = [
+  {
+    id: 'B_ATT_01',
+    domain: 'attachment_style',
+    version: 'both',
+    type: 'Likert',
+    scale: 5,
+    text: '가까운 사람에게 의지하는 것이 편하다.',
+    weight: 0.35,
+    labels: LIKERT_AGREEMENT,
+    helpText: '애착 이론에서 "안전 애착"의 핵심 지표입니다.',
+  },
+  {
+    id: 'B_ATT_02',
+    domain: 'attachment_style',
+    version: 'both',
+    type: 'Likert',
+    scale: 5,
+    text: '상대방이 나를 떠날까 봐 불안한 마음이 자주 든다.',
+    weight: 0.35,
+    reverse: true,
+    labels: LIKERT_FREQUENCY,
+    helpText: '불안 애착 성향을 측정합니다.',
+  },
+  {
+    id: 'B_ATT_03',
+    domain: 'attachment_style',
+    version: 'both',
+    type: 'Likert',
+    scale: 5,
+    text: '감정적으로 가까워지는 것이 불편하거나 부담스럽다.',
+    weight: 0.30,
+    reverse: true,
+    labels: LIKERT_AGREEMENT,
+    helpText: '회피 애착 성향을 측정합니다.',
+  },
+
+  // ────────────────────────────────────────
+  // 개인 성격/성향 — 감정 조절 (3문항)
+  // ────────────────────────────────────────
+
+  {
+    id: 'B_EMO_01',
+    domain: 'emotional_regulation',
+    version: 'both',
+    type: 'Likert',
+    scale: 5,
+    text: '화가 나거나 속상할 때 감정을 스스로 조절할 수 있다.',
+    weight: 0.35,
+    labels: LIKERT_AGREEMENT,
+  },
+  {
+    id: 'B_EMO_02',
+    domain: 'emotional_regulation',
+    version: 'both',
+    type: 'Likert',
+    scale: 5,
+    text: '스트레스 상황에서 충동적인 말이나 행동을 하는 편이다.',
+    weight: 0.35,
+    reverse: true,
+    labels: LIKERT_FREQUENCY,
+  },
+  {
+    id: 'B_EMO_03',
+    domain: 'emotional_regulation',
+    version: 'both',
+    type: 'Likert',
+    scale: 5,
+    text: '부정적인 감정이 오래 지속되지 않고 비교적 빠르게 회복한다.',
+    weight: 0.30,
+    labels: LIKERT_AGREEMENT,
+  },
+
+  // ────────────────────────────────────────
+  // 개인 성격/성향 — 자기 인식 (3문항)
+  // ────────────────────────────────────────
+
+  {
+    id: 'B_SEL_01',
+    domain: 'self_awareness',
+    version: 'both',
+    type: 'Likert',
+    scale: 5,
+    text: '내가 어떤 상황에서 어떤 감정을 느끼는지 잘 알고 있다.',
+    weight: 0.35,
+    labels: LIKERT_AGREEMENT,
+  },
+  {
+    id: 'B_SEL_02',
+    domain: 'self_awareness',
+    version: 'both',
+    type: 'Likert',
+    scale: 5,
+    text: '갈등 상황에서 나의 역할이나 기여를 돌아볼 수 있다.',
+    weight: 0.35,
+    labels: LIKERT_AGREEMENT,
+  },
+  {
+    id: 'B_SEL_03',
+    domain: 'self_awareness',
+    version: 'both',
+    type: 'Likert',
+    scale: 5,
+    text: '내 감정을 말로 표현하는 것이 어렵다.',
+    weight: 0.30,
+    reverse: true,
+    labels: LIKERT_AGREEMENT,
+    helpText: '감정 표현 불능증(알렉시시미아) 경향을 측정합니다.',
+  },
+];
+
+/** 간략 설문 전체 (관계 + 성격/성향) */
+export const briefSurveyFull: SurveyQuestion[] = [...briefSurvey, ...briefPersonalitySurvey];
+
 export const BRIEF_SURVEY_META = {
   version: 'brief' as const,
-  totalQuestions: briefSurvey.length,
-  estimatedMinutes: { min: 5, max: 10 },
-  description: '핵심 관계 상태를 빠르게 파악하는 설문입니다.',
-  domains: ['communication', 'conflict', 'intimacy', 'trust', 'values', 'satisfaction'] as const,
+  totalQuestions: briefSurveyFull.length,
+  estimatedMinutes: { min: 7, max: 12 },
+  description: '관계 상태와 개인 성향을 빠르게 파악하는 설문입니다.',
+  domains: [
+    'communication', 'conflict', 'intimacy', 'trust', 'values', 'satisfaction',
+    'attachment_style', 'emotional_regulation', 'self_awareness',
+  ] as const,
 };

@@ -24,7 +24,30 @@ export type SurveyDomain =
   | 'intimacy'       // 정서적 친밀감
   | 'trust'          // 신뢰/안전감
   | 'values'         // 가치관/목표 일치도
-  | 'satisfaction';  // 일상 생활 만족도
+  | 'satisfaction'   // 일상 생활 만족도
+  | 'attachment_style'   // 애착 유형
+  | 'emotional_regulation' // 감정 조절 능력
+  | 'self_awareness';     // 자기 인식
+
+/** 설문 영역의 상위 카테고리 */
+export type SurveyCategory = 'relationship' | 'personality';
+
+export const DOMAIN_CATEGORY: Record<SurveyDomain, SurveyCategory> = {
+  communication: 'relationship',
+  conflict: 'relationship',
+  intimacy: 'relationship',
+  trust: 'relationship',
+  values: 'relationship',
+  satisfaction: 'relationship',
+  attachment_style: 'personality',
+  emotional_regulation: 'personality',
+  self_awareness: 'personality',
+};
+
+export const CATEGORY_LABELS: Record<SurveyCategory, string> = {
+  relationship: '관계 영역',
+  personality: '개인 성격 · 성향',
+};
 
 export const DOMAIN_LABELS: Record<SurveyDomain, string> = {
   communication: '의사소통',
@@ -33,6 +56,9 @@ export const DOMAIN_LABELS: Record<SurveyDomain, string> = {
   trust: '신뢰 / 안전감',
   values: '가치관 & 목표',
   satisfaction: '관계 만족도',
+  attachment_style: '애착 유형',
+  emotional_regulation: '감정 조절',
+  self_awareness: '자기 인식',
 };
 
 // ─────────────────────────────────────────────

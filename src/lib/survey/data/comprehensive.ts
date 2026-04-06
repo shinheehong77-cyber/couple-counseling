@@ -8,6 +8,7 @@
  */
 
 import type { SurveyQuestion } from '../types';
+import { phq9Survey, gad7Survey, rasSurvey } from './clinical';
 
 const LIKERT_AGREEMENT: [string, string, string, string, string] = [
   '전혀 그렇지 않다',
@@ -743,10 +744,206 @@ export const comprehensiveSurvey: SurveyQuestion[] = [
   },
 ];
 
+// ═══════════════════════════════════════════
+// 개인 성격/성향 — 애착 유형 (5문항)
+// ═══════════════════════════════════════════
+
+export const comprehensivePersonalitySurvey: SurveyQuestion[] = [
+  {
+    id: 'C_ATT_01',
+    domain: 'attachment_style',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '가까운 사람에게 의지하는 것이 편하다.',
+    weight: 0.13,
+    labels: LIKERT_AGREEMENT,
+    helpText: 'Bowlby 애착 이론 — 안전 기지(Secure Base) 개념.',
+  },
+  {
+    id: 'C_ATT_02',
+    domain: 'attachment_style',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '상대방이 나를 떠날까 봐 불안한 마음이 자주 든다.',
+    weight: 0.13,
+    reverse: true,
+    labels: LIKERT_FREQUENCY,
+    helpText: '불안 애착(Anxious Attachment) 차원.',
+  },
+  {
+    id: 'C_ATT_03',
+    domain: 'attachment_style',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '감정적으로 가까워지는 것이 불편하거나 부담스럽다.',
+    weight: 0.12,
+    reverse: true,
+    labels: LIKERT_AGREEMENT,
+    helpText: '회피 애착(Avoidant Attachment) 차원.',
+  },
+  {
+    id: 'C_ATT_04',
+    domain: 'attachment_style',
+    version: 'comprehensive',
+    type: 'Checklist',
+    text: '친밀한 관계에서 나는 주로 어떤 패턴을 보이나요? (해당하는 것 모두 선택)',
+    weight: 0.10,
+    options: [
+      { value: 'seek_reassurance', label: '자주 확인받고 싶어 함', scoreImpact: -5 },
+      { value: 'withdraw', label: '힘들 때 혼자 있고 싶어 함', scoreImpact: -5 },
+      { value: 'express_needs', label: '필요한 것을 말로 잘 표현함', scoreImpact: 8 },
+      { value: 'fear_rejection', label: '거절당할까 봐 요구를 못 함', scoreImpact: -7 },
+      { value: 'comfortable_closeness', label: '가까운 관계가 편안함', scoreImpact: 10 },
+    ],
+  },
+  {
+    id: 'C_ATT_05',
+    domain: 'attachment_style',
+    version: 'comprehensive',
+    type: 'FreeText',
+    text: '어린 시절 가족 관계가 현재 연인/배우자와의 관계에 영향을 주고 있다고 느끼나요?',
+    weight: 0.05,
+    placeholder: '예: 부모님이 자주 다투셨던 경험이 갈등을 회피하게 만드는 것 같아요...',
+    maxLength: 500,
+    analyzedByAI: true,
+  },
+
+  // ═══════════════════════════════════════════
+  // 개인 성격/성향 — 감정 조절 (5문항)
+  // ═══════════════════════════════════════════
+
+  {
+    id: 'C_EMO_01',
+    domain: 'emotional_regulation',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '화가 나거나 속상할 때 감정을 스스로 조절할 수 있다.',
+    weight: 0.13,
+    labels: LIKERT_AGREEMENT,
+  },
+  {
+    id: 'C_EMO_02',
+    domain: 'emotional_regulation',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '스트레스 상황에서 충동적인 말이나 행동을 하는 편이다.',
+    weight: 0.13,
+    reverse: true,
+    labels: LIKERT_FREQUENCY,
+  },
+  {
+    id: 'C_EMO_03',
+    domain: 'emotional_regulation',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '부정적인 감정이 오래 지속되지 않고 비교적 빠르게 회복한다.',
+    weight: 0.12,
+    labels: LIKERT_AGREEMENT,
+  },
+  {
+    id: 'C_EMO_04',
+    domain: 'emotional_regulation',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '감정적으로 힘들 때 건강한 방식으로 대처한다 (운동, 대화, 취미 등).',
+    weight: 0.10,
+    labels: LIKERT_AGREEMENT,
+  },
+  {
+    id: 'C_EMO_05',
+    domain: 'emotional_regulation',
+    version: 'comprehensive',
+    type: 'VisualSlider',
+    min: 0,
+    max: 100,
+    minLabel: '매우 어려움',
+    maxLabel: '매우 잘함',
+    text: '전반적으로 자신의 감정 조절 능력이 어느 정도라고 느끼나요?',
+    weight: 0.10,
+  },
+
+  // ═══════════════════════════════════════════
+  // 개인 성격/성향 — 자기 인식 (5문항)
+  // ═══════════════════════════════════════════
+
+  {
+    id: 'C_SEL_01',
+    domain: 'self_awareness',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '내가 어떤 상황에서 어떤 감정을 느끼는지 잘 알고 있다.',
+    weight: 0.13,
+    labels: LIKERT_AGREEMENT,
+  },
+  {
+    id: 'C_SEL_02',
+    domain: 'self_awareness',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '갈등 상황에서 나의 역할이나 기여를 돌아볼 수 있다.',
+    weight: 0.13,
+    labels: LIKERT_AGREEMENT,
+  },
+  {
+    id: 'C_SEL_03',
+    domain: 'self_awareness',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '내 감정을 말로 표현하는 것이 어렵다.',
+    weight: 0.12,
+    reverse: true,
+    labels: LIKERT_AGREEMENT,
+    helpText: '감정 표현 불능증(알렉시시미아) 경향.',
+  },
+  {
+    id: 'C_SEL_04',
+    domain: 'self_awareness',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '나 자신의 강점과 약점을 비교적 정확하게 파악하고 있다.',
+    weight: 0.10,
+    labels: LIKERT_AGREEMENT,
+  },
+  {
+    id: 'C_SEL_05',
+    domain: 'self_awareness',
+    version: 'comprehensive',
+    type: 'FreeText',
+    text: '관계에서 반복되는 나의 패턴이 있다면 자유롭게 적어 주세요.',
+    weight: 0.05,
+    placeholder: '예: 화가 나면 말을 안 하고 침묵하는 편이에요...',
+    maxLength: 500,
+    analyzedByAI: true,
+  },
+];
+
+/** 종합 설문 전체 (관계 + 성격/성향 + 임상 평가) */
+export const comprehensiveSurveyFull: SurveyQuestion[] = [
+  ...comprehensiveSurvey,
+  ...comprehensivePersonalitySurvey,
+  ...phq9Survey,
+  ...gad7Survey,
+  ...rasSurvey,
+];
+
 export const COMPREHENSIVE_SURVEY_META = {
   version: 'comprehensive' as const,
-  totalQuestions: comprehensiveSurvey.length,
-  estimatedMinutes: { min: 30, max: 60 },
-  description: '심층 심리분석을 위한 포괄적 설문입니다.',
-  domains: ['communication', 'conflict', 'intimacy', 'trust', 'values', 'satisfaction'] as const,
+  totalQuestions: comprehensiveSurveyFull.length,
+  estimatedMinutes: { min: 40, max: 70 },
+  description: '관계와 개인 심리를 심층 분석하는 포괄적 설문입니다.',
+  domains: [
+    'communication', 'conflict', 'intimacy', 'trust', 'values', 'satisfaction',
+    'attachment_style', 'emotional_regulation', 'self_awareness',
+  ] as const,
 };

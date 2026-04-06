@@ -7,6 +7,9 @@ const DOMAIN_LABELS: Record<SurveyDomain, string> = {
   trust: "신뢰 / 안전감",
   values: "가치관 & 목표",
   satisfaction: "관계 만족도",
+  attachment_style: "애착 유형",
+  emotional_regulation: "감정 조절",
+  self_awareness: "자기 인식",
 };
 
 const LEVEL_LABELS: Record<string, string> = {
