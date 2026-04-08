@@ -21,9 +21,6 @@ export default function ChecklistQuestion({ question, values = [], onChange, dis
 
   return (
     <div className="survey-question-body">
-      {question.helpText && (
-        <p className="survey-help-text">{question.helpText}</p>
-      )}
       {question.maxSelections && (
         <p className="survey-help-text">최대 {question.maxSelections}개 선택</p>
       )}

@@ -3,6 +3,7 @@
 import type { SurveyResult, ScoreLevel, SurveyDomain, SurveyCategory } from "../types";
 import { DOMAIN_LABELS, SCORE_LEVEL_LABELS, DOMAIN_CATEGORY, CATEGORY_LABELS } from "../types";
 import { useRouter } from "next/navigation";
+import { getCounselingChatPath, readSelectedCounselingMode } from "@/lib/counseling-mode";
 
 interface Props {
   result: SurveyResult;
@@ -38,10 +39,23 @@ export default function ResultsSummary({ result, onStartCounseling }: Props) {
   const router = useRouter();
   const { totalScore, totalLevel, domainScores, aiContextPayload, riskFlags } = result;
 
-  function handleStartCounseling() {
+  async function handleStartCounseling() {
     if (onStartCounseling) {
       onStartCounseling();
     } else {
+      // Create program if none exists
+      try {
+        const programRes = await fetch("/api/program");
+        const programData = await programRes.json();
+        if (!programData?.id) {
+          await fetch("/api/program", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({}),
+          });
+        }
+      } catch { /* program creation failed, continue anyway */ }
+
       // Pass AI context as session storage then navigate to chat
       try {
         sessionStorage.setItem(
@@ -51,7 +65,8 @@ export default function ResultsSummary({ result, onStartCounseling }: Props) {
       } catch {
         // ignore
       }
-      router.push("/counseling");
+      const mode = readSelectedCounselingMode() ?? "chat";
+      router.push(getCounselingChatPath(mode));
     }
   }
 
@@ -146,18 +161,19 @@ export default function ResultsSummary({ result, onStartCounseling }: Props) {
         </div>
       )}
 
-      {/* AI 상담 시작 버튼 */}
+      {/* 상담 시작 버튼 */}
       <div className="results-cta">
+        <p className="results-cta-note">
+          설문 결과를 바탕으로 맞춤 상담이 시작됩니다
+        </p>
         <button
           type="button"
           onClick={handleStartCounseling}
           className="survey-btn survey-btn--primary results-cta-btn"
+          style={{ minHeight: "48px" }}
         >
-          AI 상담 시작하기 →
+          상담 시작하기 →
         </button>
-        <p className="results-cta-note">
-          설문 결과를 바탕으로 맞춤 상담을 제공합니다
-        </p>
       </div>
     </div>
   );

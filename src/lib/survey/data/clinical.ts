@@ -11,6 +11,7 @@
  */
 
 import type { SurveyQuestion } from '../types';
+import { LIKERT_AGREEMENT } from './constants';
 
 const LIKERT_PHQ: [string, string, string, string] = [
   '전혀 없었다',
@@ -24,14 +25,6 @@ const LIKERT_GAD: [string, string, string, string] = [
   '며칠간 있었다',
   '1주일 이상 있었다',
   '거의 매일 있었다',
-];
-
-const LIKERT_AGREEMENT: [string, string, string, string, string] = [
-  '전혀 그렇지 않다',
-  '그렇지 않은 편이다',
-  '보통이다',
-  '그런 편이다',
-  '매우 그렇다',
 ];
 
 // ═══════════════════════════════════════════
@@ -48,7 +41,7 @@ export const phq9Survey: SurveyQuestion[] = [
     version: 'both',
     type: 'Likert',
     scale: 5,
-    text: '지난 2주간, 일이나 활동에 대한 흥미나 즐거움이 거의 없었다.',
+    text: '지난 2주간, 일이나 활동을 할 때 흥미나 즐거움을 느끼기 어려웠다.',
     weight: 0.12,
     reverse: true,
     labels: [...LIKERT_PHQ, '해당 없음'] as [string, string, string, string, string],
@@ -262,7 +255,7 @@ export const rasSurvey: SurveyQuestion[] = [
     version: 'both',
     type: 'Likert',
     scale: 5,
-    text: '파트너가 내 요구(needs)를 얼마나 잘 충족시켜 주나요?',
+    text: '파트너가 내 요구(needs)를 잘 충족시켜 준다고 느낀다.',
     weight: 0.15,
     labels: LIKERT_AGREEMENT,
     helpText: 'RAS 문항 1: 욕구 충족.',
@@ -273,7 +266,7 @@ export const rasSurvey: SurveyQuestion[] = [
     version: 'both',
     type: 'Likert',
     scale: 5,
-    text: '전반적으로 우리 관계에 만족하나요?',
+    text: '전반적으로 우리 관계에 만족한다.',
     weight: 0.15,
     labels: LIKERT_AGREEMENT,
     helpText: 'RAS 문항 2: 전반적 만족도.',
@@ -284,7 +277,7 @@ export const rasSurvey: SurveyQuestion[] = [
     version: 'both',
     type: 'Likert',
     scale: 5,
-    text: '다른 사람과의 관계에 비해 우리 관계가 얼마나 좋다고 느끼나요?',
+    text: '다른 사람들의 관계와 비교했을 때, 우리 관계가 좋은 편이라고 느낀다.',
     weight: 0.14,
     labels: LIKERT_AGREEMENT,
     helpText: 'RAS 문항 3: 상대적 만족도.',
@@ -295,7 +288,7 @@ export const rasSurvey: SurveyQuestion[] = [
     version: 'both',
     type: 'Likert',
     scale: 5,
-    text: '파트너를 만나지 않았으면 하고 바란 적이 자주 있나요?',
+    text: '파트너를 만나지 않았으면 하고 바란 적이 있다.',
     weight: 0.14,
     reverse: true,
     labels: LIKERT_AGREEMENT,
@@ -307,7 +300,7 @@ export const rasSurvey: SurveyQuestion[] = [
     version: 'both',
     type: 'Likert',
     scale: 5,
-    text: '우리 관계가 나의 처음 기대를 얼마나 충족시켜 주나요?',
+    text: '우리 관계가 처음 기대했던 것을 잘 충족시켜 주고 있다.',
     weight: 0.14,
     labels: LIKERT_AGREEMENT,
     helpText: 'RAS 문항 5: 기대 충족.',
@@ -318,7 +311,7 @@ export const rasSurvey: SurveyQuestion[] = [
     version: 'both',
     type: 'Likert',
     scale: 5,
-    text: '파트너를 얼마나 사랑하나요?',
+    text: '파트너를 깊이 사랑하고 있다.',
     weight: 0.14,
     labels: LIKERT_AGREEMENT,
     helpText: 'RAS 문항 6: 사랑의 깊이.',
@@ -329,7 +322,7 @@ export const rasSurvey: SurveyQuestion[] = [
     version: 'both',
     type: 'Likert',
     scale: 5,
-    text: '우리 관계에 문제가 얼마나 많나요?',
+    text: '우리 관계에 문제가 많다고 느낀다.',
     weight: 0.14,
     reverse: true,
     labels: LIKERT_AGREEMENT,

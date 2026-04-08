@@ -14,9 +14,6 @@ export default function FreeTextQuestion({ question, text = "", onChange, disabl
 
   return (
     <div className="survey-question-body">
-      {question.helpText && (
-        <p className="survey-help-text">{question.helpText}</p>
-      )}
       <textarea
         value={text}
         onChange={(e) => onChange({ type: "FreeText", text: e.target.value })}

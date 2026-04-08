@@ -22,9 +22,6 @@ export default function VisualSliderQuestion({ question, value, onChange, disabl
 
   return (
     <div className="survey-question-body">
-      {question.helpText && (
-        <p className="survey-help-text">{question.helpText}</p>
-      )}
       <div className="slider-wrapper">
         <div className="slider-value-display">{current}</div>
         <input

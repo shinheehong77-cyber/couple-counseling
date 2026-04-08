@@ -9,22 +9,7 @@
 
 import type { SurveyQuestion } from '../types';
 import { phq9Survey, gad7Survey, rasSurvey } from './clinical';
-
-const LIKERT_AGREEMENT: [string, string, string, string, string] = [
-  '전혀 그렇지 않다',
-  '그렇지 않은 편이다',
-  '보통이다',
-  '그런 편이다',
-  '매우 그렇다',
-];
-
-const LIKERT_FREQUENCY: [string, string, string, string, string] = [
-  '거의 없다',
-  '가끔 있다',
-  '종종 있다',
-  '자주 있다',
-  '매우 자주 있다',
-];
+import { LIKERT_AGREEMENT, LIKERT_FREQUENCY } from './constants';
 
 export const comprehensiveSurvey: SurveyQuestion[] = [
   // ═══════════════════════════════════════════
@@ -925,6 +910,67 @@ export const comprehensivePersonalitySurvey: SurveyQuestion[] = [
     placeholder: '예: 화가 나면 말을 안 하고 침묵하는 편이에요...',
     maxLength: 500,
     analyzedByAI: true,
+  },
+
+  // ═══════════════════════════════════════════
+  // 개인 성격/성향 — 성격 특성 (5문항)
+  // ═══════════════════════════════════════════
+
+  {
+    id: 'C_PER_01',
+    domain: 'self_awareness',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '나는 다른 사람의 감정을 잘 읽고 공감하는 편이다.',
+    weight: 0.25,
+    labels: LIKERT_AGREEMENT,
+    helpText: '공감 능력을 측정합니다.',
+  },
+  {
+    id: 'C_PER_02',
+    domain: 'self_awareness',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '새로운 상황이나 변화에 적응하는 것이 비교적 쉬운 편이다.',
+    weight: 0.25,
+    labels: LIKERT_AGREEMENT,
+    helpText: '유연성을 측정합니다.',
+  },
+  {
+    id: 'C_PER_03',
+    domain: 'emotional_regulation',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '스트레스를 받으면 혼자 있고 싶어지는 편이다.',
+    weight: 0.25,
+    labels: LIKERT_FREQUENCY,
+    helpText: '내향/외향 성향을 측정합니다.',
+  },
+  {
+    id: 'C_PER_04',
+    domain: 'self_awareness',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '갈등 상황에서 나는 직접 맞서기보다 피하는 편이다.',
+    weight: 0.25,
+    reverse: true,
+    labels: LIKERT_AGREEMENT,
+    helpText: '갈등 대처 성향을 측정합니다.',
+  },
+  {
+    id: 'C_PER_05',
+    domain: 'self_awareness',
+    version: 'comprehensive',
+    type: 'Likert',
+    scale: 5,
+    text: '나는 계획을 세우고 체계적으로 실행하는 것을 선호한다.',
+    weight: 0.25,
+    labels: LIKERT_AGREEMENT,
+    helpText: '체계성을 측정합니다.',
   },
 ];
 

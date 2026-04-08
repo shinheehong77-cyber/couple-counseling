@@ -12,9 +12,6 @@ interface Props {
 export default function LikertQuestion({ question, value, onChange, disabled }: Props) {
   return (
     <div className="survey-question-body">
-      {question.helpText && (
-        <p className="survey-help-text">{question.helpText}</p>
-      )}
       <div className="likert-options">
         {question.labels.map((label, idx) => {
           const score = (idx + 1) as 1 | 2 | 3 | 4 | 5;

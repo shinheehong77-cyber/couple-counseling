@@ -10,20 +10,26 @@ datasource db {
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 model User {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   name         String
-  email        String   @unique
-  passwordHash String   // bcrypt hash
+  email        String    @unique
+  passwordHash String    // bcrypt hash
   coupleId     String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  userMode     String    @default("solo") // "solo" | "couple"
+  onboardedAt  DateTime? // null until onboarding complete
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  couple           Couple?          @relation(fields: [coupleId], references: [id])
-  authSessions     AuthSession[]
-  sessions         Session[]
-  counselorProfile CounselorProfile?
-  surveySessions   SurveySession[]
-  assignments      Assignment[]
+  couple            Couple?            @relation(fields: [coupleId], references: [id])
+  authSessions      AuthSession[]
+  sessions          Session[]
+  counselorProfile  CounselorProfile?
+  surveySessions    SurveySession[]
+  assignments       Assignment[]
+  funnelEvents      FunnelEvent[]
+  programs          Program[]
+  assessmentReports AssessmentReport[]
+  partnerGuides     PartnerGuide[]     @relation("GuideAboutUser")
 
   @@index([email])
 }
@@ -51,6 +57,7 @@ model Couple {
   members        User[]
   sessions       Session[]
   surveySessions SurveySession[]
+  partnerGuides  PartnerGuide[]
 }
 
 // ─── Counseling Session ───────────────────────────────────────────────────────
@@ -59,6 +66,8 @@ model Session {
   id                String   @id @default(cuid())
   userId            String
   coupleId          String?
+  counselingMode    String   @default("chat") // chat, voice
+  startedFromSurveyId String?
   counselorName     String   @default("상담사")
   status            String   @default("active") // active, completed, crisis
   conflictType      String?  // communication, finance, parenting, infidelity, inlaw, intimacy
@@ -66,26 +75,31 @@ model Session {
   crisisLevel       String?  // CRITICAL, WARNING, WATCH
   watchCount        Int      @default(0)
   surveyContextJson String?  // Serialized AIContextPayload from survey scoring
+  insightJson       String?  // Structured SessionInsight extracted at session end
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   user          User           @relation(fields: [userId], references: [id])
   couple        Couple?        @relation(fields: [coupleId], references: [id])
+  startedFromSurvey SurveySession? @relation("SurveyToCounselingSessions", fields: [startedFromSurveyId], references: [id], onDelete: SetNull)
   messages      Message[]
   emotionStates EmotionState[]
   assignments   Assignment[]
+  funnelEvents  FunnelEvent[]  @relation("CounselingSessionEvents")
+  partnerGuide  PartnerGuide?
 
   @@index([userId])
   @@index([coupleId])
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  sessionId String
-  role      String   // user, assistant, system
-  content   String
-  metadata  String?  // JSON: crisis detection results, emotion tags
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  sessionId    String
+  role         String   // user, assistant, system
+  content      String
+  metadata     String?  // JSON: crisis detection results, emotion tags
+  senderUserId String?  // For couple sessions: identifies which partner sent the message
+  createdAt    DateTime @default(now())
 
   session Session @relation(fields: [sessionId], references: [id])
 
@@ -112,14 +126,41 @@ model SurveySession {
   id          String    @id @default(cuid())
   userId      String
   coupleId    String?
+  version     String    @default("brief") // brief, comprehensive
+  sectionProgressJson String? // serialized section progress + completion flags
+  resumeQuestionId String?
+  lastAnsweredQuestionId String?
+  lastActivityAt DateTime?
   completedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   user    User          @relation(fields: [userId], references: [id])
   couple  Couple?       @relation(fields: [coupleId], references: [id])
+  counselingSessions Session[] @relation("SurveyToCounselingSessions")
   answers SurveyAnswer[]
+  funnelEvents FunnelEvent[]
 
+  @@index([userId])
+}
+
+model FunnelEvent {
+  id              String    @id @default(cuid())
+  eventName       String
+  stage           String?
+  userId          String?
+  surveySessionId String?
+  sessionId       String?
+  payloadJson     String?
+  createdAt       DateTime  @default(now())
+
+  user              User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  surveySession     SurveySession? @relation(fields: [surveySessionId], references: [id], onDelete: SetNull)
+  counselingSession Session?       @relation("CounselingSessionEvents", fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([eventName, createdAt])
+  @@index([surveySessionId])
+  @@index([sessionId])
   @@index([userId])
 }
 
@@ -138,21 +179,28 @@ model SurveyAnswer {
 // ─── Assignment (상담 과제) ──────────────────────────────────────────────────
 
 model Assignment {
-  id          String    @id @default(cuid())
-  sessionId   String
-  userId      String
-  title       String
-  description String?
-  dueDate     DateTime?
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id                  String    @id @default(cuid())
+  sessionId           String
+  userId              String
+  title               String
+  description         String?
+  type                String?   // journaling, communication_exercise, reflection, gratitude, active_listening
+  response            String?   // User's written response/completion notes
+  isShared            Boolean   @default(false) // true = couple shared assignment
+  coupleId            String?   // set when isShared=true
+  partnerCompletedAt  DateTime? // partner's completion timestamp
+  partnerResponse     String?   // partner's written response
+  dueDate             DateTime?
+  completedAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   session Session @relation(fields: [sessionId], references: [id])
   user    User    @relation(fields: [userId], references: [id])
 
   @@index([sessionId])
   @@index([userId])
+  @@index([coupleId])
 }
 
 // ─── Counselor ────────────────────────────────────────────────────────────────
@@ -164,4 +212,98 @@ model CounselorProfile {
   avatarUrl   String?
   specialty   String?
   user        User    @relation(fields: [userId], references: [id])
+}
+
+// ─── 4-Week Program ──────────────────────────────────────────────────────────
+
+model Program {
+  id          String    @id @default(cuid())
+  userId      String
+  coupleId    String?
+  status      String    @default("active") // active, completed, paused
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  currentWeek Int       @default(1) // 1-4
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user  User          @relation(fields: [userId], references: [id])
+  weeks ProgramWeek[]
+
+  @@index([userId])
+}
+
+model ProgramWeek {
+  id                String    @id @default(cuid())
+  programId         String
+  weekNumber        Int       // 1-4
+  theme             String    // communication_basics, conflict_intimacy, trust_values, integration_growth
+  status            String    @default("locked") // locked, active, completed
+  progress          Float     @default(0) // 0.0 - 1.0
+  unlockedAt        DateTime?
+  completedAt       DateTime?
+  checkInSurveyId   String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  program    Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
+  milestones ProgramMilestone[]
+
+  @@unique([programId, weekNumber])
+  @@index([programId])
+}
+
+model ProgramMilestone {
+  id          String    @id @default(cuid())
+  weekId      String
+  type        String    // counseling_session, assignment, check_in_survey
+  title       String
+  description String?
+  ordinal     Int       // order within the week
+  referenceId String?   // links to Session.id, Assignment.id, or SurveySession.id
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  week ProgramWeek @relation(fields: [weekId], references: [id], onDelete: Cascade)
+
+  @@index([weekId])
+}
+
+// ─── Partner Guide (파트너 이해 가이드) ──────────────────────────────────────
+
+model PartnerGuide {
+  id        String   @id @default(cuid())
+  sessionId String   @unique // one guide per session
+  userId    String   // guide is ABOUT this user (their traits/needs)
+  coupleId  String   // which couple this guide belongs to
+  version   Int      @default(1) // Nth guide for same user
+  guideJson String   // PartnerGuideData (structured, for programmatic use)
+  guideText String   // AI-generated narrative text (for rendering)
+  createdAt DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id])
+  user    User    @relation("GuideAboutUser", fields: [userId], references: [id])
+  couple  Couple  @relation(fields: [coupleId], references: [id])
+
+  @@index([coupleId, userId])
+  @@index([userId])
+}
+
+// ─── Assessment Report ───────────────────────────────────────────────────────
+
+model AssessmentReport {
+  id              String   @id @default(cuid())
+  userId          String
+  programId       String?
+  initialSurveyId String
+  finalSurveyId   String
+  reportJson      String   // Full computed report data (JSON)
+  aiInsights      String?  // AI-generated narrative insights
+  shareToken      String?  @unique
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([shareToken])
 }

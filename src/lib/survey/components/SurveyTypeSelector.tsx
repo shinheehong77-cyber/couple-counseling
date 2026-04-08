@@ -20,6 +20,39 @@ export default function SurveyTypeSelector({ onSelect }: Props) {
       </div>
 
       <div className="survey-type-cards">
+        {/* 종합 설문 */}
+        <button
+          type="button"
+          className="survey-type-card"
+          onClick={() => onSelect("comprehensive")}
+        >
+          <div className="survey-type-icon">
+            <ClipboardList size={24} strokeWidth={1.5} />
+          </div>
+          <h2 className="survey-type-name">
+            종합 설문
+            <span className="survey-type-badge">추천</span>
+          </h2>
+          <p className="survey-type-time">
+            약 {COMPREHENSIVE_SURVEY_META.estimatedMinutes.min}~
+            {COMPREHENSIVE_SURVEY_META.estimatedMinutes.max}분
+          </p>
+          <p className="survey-type-desc">{COMPREHENSIVE_SURVEY_META.description}</p>
+          <div className="survey-type-questions">
+            {COMPREHENSIVE_SURVEY_META.totalQuestions}문항
+          </div>
+          <div className="survey-type-domains">
+            {COMPREHENSIVE_SURVEY_META.domains.map((d) => (
+              <span key={d} className="survey-type-domain-tag">
+                {getDomainLabel(d)}
+              </span>
+            ))}
+          </div>
+          <div className="survey-type-cta">
+            시작하기 <ArrowRight size={14} strokeWidth={1.5} />
+          </div>
+        </button>
+
         {/* 간략 설문 */}
         <button
           type="button"
@@ -40,36 +73,6 @@ export default function SurveyTypeSelector({ onSelect }: Props) {
           </div>
           <div className="survey-type-domains">
             {BRIEF_SURVEY_META.domains.map((d) => (
-              <span key={d} className="survey-type-domain-tag">
-                {getDomainLabel(d)}
-              </span>
-            ))}
-          </div>
-          <div className="survey-type-cta">
-            시작하기 <ArrowRight size={14} strokeWidth={1.5} />
-          </div>
-        </button>
-
-        {/* 종합 설문 */}
-        <button
-          type="button"
-          className="survey-type-card"
-          onClick={() => onSelect("comprehensive")}
-        >
-          <div className="survey-type-icon">
-            <ClipboardList size={24} strokeWidth={1.5} />
-          </div>
-          <h2 className="survey-type-name">종합 설문</h2>
-          <p className="survey-type-time">
-            약 {COMPREHENSIVE_SURVEY_META.estimatedMinutes.min}~
-            {COMPREHENSIVE_SURVEY_META.estimatedMinutes.max}분
-          </p>
-          <p className="survey-type-desc">{COMPREHENSIVE_SURVEY_META.description}</p>
-          <div className="survey-type-questions">
-            {COMPREHENSIVE_SURVEY_META.totalQuestions}문항
-          </div>
-          <div className="survey-type-domains">
-            {COMPREHENSIVE_SURVEY_META.domains.map((d) => (
               <span key={d} className="survey-type-domain-tag">
                 {getDomainLabel(d)}
               </span>

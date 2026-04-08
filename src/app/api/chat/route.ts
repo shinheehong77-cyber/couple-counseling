@@ -1,48 +1,80 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
 import { detectCrisis } from "@/lib/crisis-detection";
-import { SYSTEM_PROMPT, getConflictTypePrompt } from "@/lib/counseling-prompts";
+import { SYSTEM_PROMPT, getConflictTypePrompt, getSoloModePrompt } from "@/lib/counseling-prompts";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { formatSurveyContextForPrompt } from "@/lib/survey/format-ai-context";
 import { buildSessionHistoryContext } from "@/lib/session-history";
 import type { AIContextPayload } from "@/lib/survey/types";
 
 const anthropic = new Anthropic();
+const ANTHROPIC_MODEL = (process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6").trim();
+
+// GET /api/chat?sessionId=xxx — Load messages for an existing session
+export async function GET(req: NextRequest) {
+  const sessionId = req.nextUrl.searchParams.get("sessionId");
+  if (!sessionId) {
+    return NextResponse.json({ error: "sessionId required" }, { status: 400 });
+  }
+
+  try {
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+      include: {
+        messages: {
+          where: { role: { in: ["user", "assistant"] } },
+          orderBy: { createdAt: "asc" },
+          select: { id: true, role: true, content: true, createdAt: true },
+        },
+      },
+    });
+
+    if (!session) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      sessionId: session.id,
+      counselorName: session.counselorName,
+      status: session.status,
+      messages: session.messages,
+    });
+  } catch (error) {
+    console.error("GET /api/chat error:", error);
+    return NextResponse.json({ error: "메시지를 불러오지 못했어요." }, { status: 500 });
+  }
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { sessionId, message } = body;
 
   if (!sessionId || !message) {
-    return new Response(JSON.stringify({ error: "sessionId and message required" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ error: "sessionId and message required" }, { status: 400 });
   }
 
   // Rate limiting per session
   const rateLimit = checkRateLimit(sessionId);
   if (!rateLimit.allowed) {
-    return new Response(
-      JSON.stringify({ error: "잠시 후 다시 시도해주세요.", retryAfter: Math.ceil((rateLimit.resetAt - Date.now()) / 1000) }),
-      { status: 429, headers: { "Content-Type": "application/json", "Retry-After": String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)) } }
+    const retryAfter = Math.ceil((rateLimit.resetAt - Date.now()) / 1000);
+    return NextResponse.json(
+      { error: "잠시 후 다시 시도해주세요.", retryAfter },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
     );
   }
 
-  // Get session with history
+  // Get session with history and user info
   const session = await prisma.session.findUnique({
     where: { id: sessionId },
     include: {
       messages: { orderBy: { createdAt: "asc" }, take: 50 },
+      user: { select: { userMode: true } },
     },
   });
 
   if (!session) {
-    return new Response(JSON.stringify({ error: "Session not found" }), {
-      status: 404,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ error: "Session not found" }, { status: 404 });
   }
 
   // Crisis detection on user message
@@ -95,9 +127,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return new Response(JSON.stringify({ content: crisis.response, crisis: crisis.level }), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ content: crisis.response, crisis: crisis.level });
   }
 
   // Build message history for Claude
@@ -124,6 +154,12 @@ export async function POST(req: NextRequest) {
   if (session.conflictType) {
     systemParts.push(getConflictTypePrompt(session.conflictType));
   }
+
+  // Solo mode: adjust counselor framing for self-understanding focus
+  if (session.user?.userMode === "solo") {
+    systemParts.push(getSoloModePrompt());
+  }
+
   if (crisis.level === "WARNING" && crisis.response) {
     systemParts.push(
       `주의: 사용자가 위험 신호를 보이고 있습니다. 응답에 자연스럽게 전문가 의뢰를 포함하세요.`
@@ -145,7 +181,7 @@ export async function POST(req: NextRequest) {
 
       try {
         const claudeStream = anthropic.messages.stream({
-          model: "claude-sonnet-4-20250514",
+          model: ANTHROPIC_MODEL,
           max_tokens: 1024,
           system: systemParts.join("\n\n"),
           messages,
@@ -167,7 +203,13 @@ export async function POST(req: NextRequest) {
         const emotionMatch = fullResponse.match(
           /<!-- EMOTION:({.*?}) -->/
         );
-        let cleanResponse = fullResponse.replace(/<!-- EMOTION:.*? -->/g, "").trim();
+        const cleanResponse = fullResponse
+          .replace(/<!-- EMOTION:.*? -->/g, "")
+          .replace(/<!-- ASSIGNMENT:.*? -->/g, "")
+          .replace(/<!-- SUGGESTIONS:.*? -->/g, "")
+          .replace(/<!-- STAGE:\d+ -->/g, "")
+          .replace(/<!-- SESSION_COMPLETE:.*? -->/g, "")
+          .trim();
 
         if (emotionMatch) {
           try {
@@ -182,6 +224,26 @@ export async function POST(req: NextRequest) {
             });
           } catch {
             // emotion parse failed, continue
+          }
+        }
+
+        // Extract and save ALL assignment metadata
+        const assignmentMatches = [...fullResponse.matchAll(/<!-- ASSIGNMENT:({.*?}) -->/g)];
+        for (const match of assignmentMatches) {
+          try {
+            const assignmentData = JSON.parse(match[1]);
+            await prisma.assignment.create({
+              data: {
+                sessionId: sessionId,
+                userId: session.userId,
+                title: assignmentData.title || "상담 과제",
+                description: assignmentData.description || null,
+                type: assignmentData.type || null,
+                dueDate: assignmentData.dueDate ? new Date(assignmentData.dueDate) : null,
+              },
+            });
+          } catch {
+            // Assignment parse failed, continue
           }
         }
 

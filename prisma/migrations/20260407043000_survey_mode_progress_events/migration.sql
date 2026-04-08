@@ -1,0 +1,3 @@
+-- No-op migration.
+-- Baseline was regenerated in 20260401085642_init to include current schema state,
+-- including survey/session/event structures introduced during KDS-180/KDS-182.

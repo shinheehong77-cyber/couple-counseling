@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import BottomNav from "@/components/BottomNav";
 
 export const metadata: Metadata = {
-  title: "부부상담",
-  description: "관계 개선을 위한 AI 상담 서비스",
+  title: "마주",
+  description: "서로를 마주보는 시간, 관계 개선 상담 서비스",
 };
 
 export default function RootLayout({
@@ -24,11 +25,14 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400..700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <div className="flex-1 pb-[72px]">{children}</div>
+        <BottomNav />
+      </body>
     </html>
   );
 }

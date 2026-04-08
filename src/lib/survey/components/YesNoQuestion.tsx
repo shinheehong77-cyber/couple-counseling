@@ -12,9 +12,6 @@ interface Props {
 export default function YesNoQuestion({ question, value, onChange, disabled }: Props) {
   return (
     <div className="survey-question-body">
-      {question.helpText && (
-        <p className="survey-help-text">{question.helpText}</p>
-      )}
       <div className="yesno-options">
         <button
           type="button"

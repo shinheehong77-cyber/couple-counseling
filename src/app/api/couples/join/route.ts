@@ -9,9 +9,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
   }
 
-  const { inviteCode } = await req.json();
+  const { code: inviteCode } = await req.json();
   if (!inviteCode) {
-    return NextResponse.json({ error: "inviteCode 필수" }, { status: 400 });
+    return NextResponse.json({ error: "code 필수" }, { status: 400 });
   }
 
   const couple = await prisma.couple.findUnique({

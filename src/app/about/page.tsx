@@ -6,7 +6,7 @@ export default function AboutPage() {
       {/* ── Nav ── */}
       <nav className="landing-nav">
         <Link href="/" className="landing-wordmark">
-          부부상담
+          마주
         </Link>
         <div className="about-nav-links">
           <Link href="/survey" className="about-nav-link">
@@ -21,53 +21,53 @@ export default function AboutPage() {
       {/* ── Hero ── */}
       <header className="about-hero">
         <div className="about-hero-inner">
-          <p className="landing-section-label">About Us</p>
+          <p className="landing-section-label">임상 기반</p>
           <h1 className="about-headline">
-            과학이 함께하는<br />
-            <em>관계 회복의 여정</em>
+            과학적 근거 위에<br />
+            <em>설계된 관계 상담</em>
           </h1>
           <p className="about-subheadline">
-            이 서비스는 최신 심리학 연구와 과학적 방법론을 바탕으로,
-            어려움을 겪는 부부 관계의 개선을 돕기 위해 만들어졌습니다.
+            마주는 40년 이상의 부부 관계 연구와 임상으로 검증된 방법론을 바탕으로
+            설계되었어요. 감에 의존하지 않고, 근거 있는 구조로 두 분을 안내해 드려요.
           </p>
         </div>
       </header>
 
       <div className="landing-section-rule" aria-hidden="true" />
 
-      {/* ── Philosophy ── */}
-      <section className="about-section" aria-labelledby="philosophy-heading">
-        <div className="about-section-inner">
-          <p className="landing-section-label">우리의 철학</p>
-          <h2 id="philosophy-heading" className="about-section-heading">
-            판단이 아닌 이해,<br />처방이 아닌 동행
-          </h2>
-          <div className="about-text-block">
-            <p>
-              우리는 모든 관계에 고유한 맥락이 있다고 믿습니다. 부부 사이의 갈등은
-              단순한 &apos;문제&apos;가 아니라, 서로를 더 깊이 이해할 수 있는 기회입니다.
-            </p>
-            <p>
-              이 서비스는 과학적으로 검증된 심리치료 이론과 임상 도구를 기반으로,
-              두 사람이 자신과 상대방의 감정을 안전하게 탐색하고,
-              건강한 소통 방식을 함께 찾아갈 수 있도록 설계되었습니다.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <div className="landing-section-rule" aria-hidden="true" />
-
-      {/* ── Methodologies ── */}
+      {/* ── Clinical Foundations ── */}
       <section className="about-section" aria-labelledby="methods-heading">
         <div className="about-section-inner">
-          <p className="landing-section-label">과학적 기반</p>
+          <p className="landing-section-label">3가지 임상 기반</p>
           <h2 id="methods-heading" className="about-section-heading">
-            우리 서비스에 적용된<br />연구와 방법론
+            세계적으로 검증된<br />방법론을 통합했어요
           </h2>
 
           <div className="about-methods-grid">
             <article className="about-method-card">
+              <div className="about-method-badge">01</div>
+              <h3 className="about-method-title">
+                Gottman 방법론
+              </h3>
+              <p className="about-method-author">
+                Dr. John Gottman &amp; Dr. Julie Gottman
+              </p>
+              <p className="about-method-desc">
+                40년 이상, 3,000쌍이 넘는 부부를 연구한 결과물이에요.
+                관계를 무너뜨리는 4가지 핵심 패턴(비판, 경멸, 방어, 담쌓기)을
+                감지하고 교정하며, 건강한 관계의 집(Sound Relationship House)
+                7단계 구조를 통해 두 사람이 함께 성장할 수 있도록 안내해요.
+              </p>
+              <p className="about-method-stat">
+                93.6% 정확도로 이혼 예측 — 연구의 깊이가 곧 개입의 정밀함이에요.
+              </p>
+              <p className="about-method-ref">
+                Gottman, J. M. (1994). <em>What Predicts Divorce?</em> Lawrence Erlbaum.
+              </p>
+            </article>
+
+            <article className="about-method-card">
+              <div className="about-method-badge">02</div>
               <h3 className="about-method-title">
                 감정중심치료 (EFT)
               </h3>
@@ -75,9 +75,13 @@ export default function AboutPage() {
                 Dr. Sue Johnson
               </p>
               <p className="about-method-desc">
-                감정중심치료는 성인 애착 이론에 기반하여 부부 사이의 정서적 유대를
-                회복하는 데 초점을 맞춥니다. 30년 이상의 임상 연구를 통해
-                70-75%의 부부가 관계 개선을 경험한 것으로 보고되었습니다.
+                성인 애착 이론에 기반한 근거 중심 치료예요. 갈등의 표면 아래
+                숨은 감정과 애착 욕구를 탐색하고, 반복되는 부정적 순환 패턴을
+                인식해서 끊어내는 데 초점을 맞춰요. 관계의 감정적 유대를
+                근본부터 회복시키는 방법론이에요.
+              </p>
+              <p className="about-method-stat">
+                70–75%의 커플이 유의미한 관계 개선을 경험 — 미국심리학회(APA) 인정 근거 기반 치료예요.
               </p>
               <p className="about-method-ref">
                 Johnson, S. M. (2004). <em>The Practice of Emotionally Focused Couple Therapy.</em> Brunner-Routledge.
@@ -85,38 +89,23 @@ export default function AboutPage() {
             </article>
 
             <article className="about-method-card">
+              <div className="about-method-badge">03</div>
               <h3 className="about-method-title">
-                Gottman 방법론
+                한국 문화 통합 모델
               </h3>
               <p className="about-method-author">
-                Dr. John Gottman & Dr. Julie Gottman
+                한국가족치료학회 기반
               </p>
               <p className="about-method-desc">
-                40년 이상의 부부 관계 연구를 통해 개발된 방법론입니다.
-                관계를 해치는 4대 위험 신호(비난, 경멸, 방어, 담쌓기)를 식별하고,
-                건강한 갈등 관리 방식을 훈련합니다.
+                서양 방법론을 그대로 적용하면 한국 부부에게 맞지 않는 경우가
+                많아요. 체면, 정, 유교적 가족 역동, 시댁·처가 관계 등 한국
+                부부 갈등의 고유한 맥락을 반영해서 상담을 설계했어요.
+              </p>
+              <p className="about-method-stat">
+                드러내기 → 서로알기 → 실행하기, 한국 단기 부부상담 3단계 모델을 적용해요.
               </p>
               <p className="about-method-ref">
-                Gottman, J. M., & Silver, N. (2015). <em>The Seven Principles for Making Marriage Work.</em> Harmony Books.
-              </p>
-            </article>
-
-            <article className="about-method-card">
-              <h3 className="about-method-title">
-                성인 애착 이론
-              </h3>
-              <p className="about-method-author">
-                Bowlby, Hazan & Shaver
-              </p>
-              <p className="about-method-desc">
-                개인의 애착 유형(안정형, 불안형, 회피형)이 친밀한 관계에서의
-                소통 패턴과 갈등 반응에 깊은 영향을 미칩니다.
-                자신과 상대방의 애착 패턴을 이해함으로써 관계의 악순환을 인식하고
-                변화의 실마리를 찾을 수 있습니다.
-              </p>
-              <p className="about-method-ref">
-                Hazan, C., & Shaver, P. (1987). Romantic love conceptualized as an attachment process.
-                <em> Journal of Personality and Social Psychology, 52</em>(3), 511-524.
+                한국가족치료학회. Korean Integrative Family Therapy Model.
               </p>
             </article>
           </div>
@@ -125,52 +114,100 @@ export default function AboutPage() {
 
       <div className="landing-section-rule" aria-hidden="true" />
 
-      {/* ── Clinical Tools ── */}
-      <section className="about-section" aria-labelledby="tools-heading">
+      {/* ── 4-Week Program ── */}
+      <section className="about-section" aria-labelledby="program-heading">
         <div className="about-section-inner">
-          <p className="landing-section-label">임상 평가 도구</p>
-          <h2 id="tools-heading" className="about-section-heading">
-            검증된 심리 평가 도구로<br />현재 상태를 이해합니다
+          <p className="landing-section-label">4주 프로그램</p>
+          <h2 id="program-heading" className="about-section-heading">
+            주차별로 단계를 밟아가며<br />관계를 다시 설계해요
+          </h2>
+          <p className="about-program-intro">
+            매주 개별상담 → 공동상담 → 과제 수행 → 체크인 순서로 진행돼요.
+            두 분이 함께 구조 안에서 움직이면, 변화는 우연이 아니라 설계의 결과가 돼요.
+          </p>
+
+          <div className="about-program-grid">
+            <div className="about-program-week">
+              <div className="about-program-week-number">1주차</div>
+              <div className="about-program-week-theme">현재 상태 파악</div>
+              <p className="about-program-week-desc">
+                각자의 감정과 상황을 탐색하고, 서로의 시각을 안전하게 공유해요.
+                감사일기와 경청 연습으로 한 주를 마무리해요.
+              </p>
+            </div>
+            <div className="about-program-week">
+              <div className="about-program-week-number">2주차</div>
+              <div className="about-program-week-theme">갈등 패턴 이해</div>
+              <p className="about-program-week-desc">
+                반복되는 갈등의 원인과 패턴을 분석하고, 비폭력 대화법을 연습해요.
+                갈등 상황을 재현하고 함께 해결책을 찾아봐요.
+              </p>
+            </div>
+            <div className="about-program-week">
+              <div className="about-program-week-number">3주차</div>
+              <div className="about-program-week-theme">소통 방식 개선</div>
+              <p className="about-program-week-desc">
+                각자의 소통 스타일을 인식하고 새로운 패턴을 연습해요.
+                매일 15분 대화로 소통의 근육을 길러요.
+              </p>
+            </div>
+            <div className="about-program-week">
+              <div className="about-program-week-number">4주차</div>
+              <div className="about-program-week-theme">관계 재설계</div>
+              <p className="about-program-week-desc">
+                변화를 점검하고 두 사람만의 관계 비전을 함께 수립해요.
+                관계 선언문을 작성하며 새로운 출발점을 만들어요.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="landing-section-rule" aria-hidden="true" />
+
+      {/* ── Research Stats ── */}
+      <section className="about-section" aria-labelledby="research-heading">
+        <div className="about-section-inner">
+          <p className="landing-section-label">연구 근거</p>
+          <h2 id="research-heading" className="about-section-heading">
+            숫자로 증명된<br />상담의 효과
           </h2>
 
-          <div className="about-tools-list">
-            <div className="about-tool-item">
-              <h3 className="about-tool-name">PHQ-9 (환자 건강 설문지)</h3>
-              <p className="about-tool-desc">
-                우울 증상의 심각도를 선별하는 9문항 자기보고식 도구입니다.
-                전 세계적으로 가장 널리 사용되는 우울 선별 도구 중 하나입니다.
+          <div className="about-stats-grid">
+            <div className="about-stat-card">
+              <div className="about-stat-number">70%</div>
+              <p className="about-stat-desc">
+                부부상담을 받은 커플의 70%가 관계 개선을 보고했어요.
               </p>
-              <p className="about-method-ref">
-                Kroenke, K., Spitzer, R. L., & Williams, J. B. (2001).
-                The PHQ-9: validity of a brief depression severity measure.
-                <em> Journal of General Internal Medicine, 16</em>(9), 606-613.
+              <p className="about-stat-source">
+                Journal of Consulting and Clinical Psychology
               </p>
             </div>
+            <div className="about-stat-card">
+              <div className="about-stat-number">93.6%</div>
+              <p className="about-stat-desc">
+                Gottman 연구팀이 이혼을 예측한 정확도예요. 이 연구가 마주 상담 설계의 기초예요.
+              </p>
+              <p className="about-stat-source">
+                Gottman, J. M. (1994). What Predicts Divorce?
+              </p>
+            </div>
+            <div className="about-stat-card">
+              <div className="about-stat-number">70–75%</div>
+              <p className="about-stat-desc">
+                EFT 치료를 받은 커플 중 유의미한 변화를 경험한 비율이에요.
+              </p>
+              <p className="about-stat-source">
+                APA Division 43, EFT Research Summary
+              </p>
+            </div>
+          </div>
 
-            <div className="about-tool-item">
-              <h3 className="about-tool-name">GAD-7 (범불안장애 척도)</h3>
-              <p className="about-tool-desc">
-                불안 증상의 심각도를 선별하는 7문항 자기보고식 도구입니다.
-                관계 스트레스로 인한 불안 수준을 파악하는 데 활용됩니다.
-              </p>
-              <p className="about-method-ref">
-                Spitzer, R. L., Kroenke, K., Williams, J. B., & Löwe, B. (2006).
-                A brief measure for assessing generalized anxiety disorder.
-                <em> Archives of Internal Medicine, 166</em>(10), 1092-1097.
-              </p>
-            </div>
-
-            <div className="about-tool-item">
-              <h3 className="about-tool-name">RAS (관계 만족도 척도)</h3>
-              <p className="about-tool-desc">
-                관계에 대한 전반적인 만족도를 측정하는 7문항 도구입니다.
-                상담 전후의 변화를 추적하는 데 효과적으로 사용됩니다.
-              </p>
-              <p className="about-method-ref">
-                Hendrick, S. S. (1988). A generic measure of relationship satisfaction.
-                <em> Journal of Marriage and the Family, 50</em>(1), 93-98.
-              </p>
-            </div>
+          <div className="about-research-note">
+            <p>
+              마주는 전문 심리 상담사가 직접 진행하는 오프라인 상담의 구조와 방법론을
+              모바일 환경에 옮긴 서비스예요. 상담의 형식은 바뀌었지만, 그 안의 근거는 그대로예요.
+            </p>
           </div>
         </div>
       </section>
@@ -186,18 +223,16 @@ export default function AboutPage() {
           <div className="about-disclaimer-text">
             <p>
               본 서비스는 <strong>관계 개선을 위한 자기 탐색 도구</strong>이며,
-              전문 심리 상담이나 의료 행위를 대체하지 않습니다.
+              전문 심리 상담이나 의료 행위를 대체하지 않아요.
             </p>
             <p>
-              서비스에 포함된 심리 평가 도구(PHQ-9, GAD-7 등)는
-              <strong>선별(screening) 목적</strong>으로만 사용되며,
-              의학적 진단을 위한 것이 아닙니다.
-              평가 결과가 심각한 수준을 나타내는 경우,
-              반드시 정신건강 전문가와 상담하시기 바랍니다.
+              서비스에 포함된 심리 평가 도구는 <strong>선별(screening) 목적</strong>으로만
+              사용되며, 의학적 진단을 위한 것이 아니에요. 평가 결과가 심각한 수준을
+              나타내는 경우, 반드시 정신건강 전문가와 상담하시기 바라요.
             </p>
             <p>
               긴급한 위기 상황(자해, 자살 충동, 가정폭력 등)이 발생한 경우
-              즉시 전문 기관에 연락하시기 바랍니다.
+              즉시 전문 기관에 연락하시기 바라요.
             </p>
             <div className="about-hotlines">
               <p><strong>자살예방상담전화</strong> 1393 (24시간)</p>
@@ -213,10 +248,10 @@ export default function AboutPage() {
         <div className="landing-bottom-cta-inner">
           <div className="landing-ornament" aria-hidden="true">✦</div>
           <h2 id="about-cta-heading" className="landing-bottom-cta-heading">
-            과학과 함께, 관계의 새로운 시작
+            근거 있는 상담으로<br />두 분의 이야기를 시작해요
           </h2>
           <p className="landing-bottom-cta-desc">
-            검증된 방법론을 바탕으로 두 분의 이야기를 시작해보세요.
+            40년의 연구가 뒷받침하는 구조 안에서, 두 분만의 속도로 진행해요.
           </p>
           <Link href="/survey" className="landing-cta-btn">
             상담 시작하기
@@ -226,9 +261,13 @@ export default function AboutPage() {
 
       {/* ── Footer ── */}
       <footer className="landing-footer">
-        <p className="landing-footer-copy">
-          © 2026 부부상담 · 과학적 방법론 기반 관계 개선 서비스
-        </p>
+        <div className="landing-footer-inner">
+          <p className="landing-footer-brand">MAJU</p>
+          <p className="landing-footer-tagline">서로를 마주보는 시간</p>
+          <p className="landing-footer-copy">
+            © 2026 마주 · 모든 권리 보유
+          </p>
+        </div>
       </footer>
     </div>
   );

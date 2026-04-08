@@ -37,7 +37,7 @@ export default function SignupPage() {
         return;
       }
 
-      router.push("/survey");
+      router.push("/dashboard");
       router.refresh();
     } catch {
       setError("연결에 문제가 생겼습니다. 잠시 후 다시 시도해주세요.");
@@ -68,11 +68,8 @@ export default function SignupPage() {
 
       <div className="auth-card">
         <div className="auth-header">
-          <Link href="/" className="auth-wordmark">부부상담</Link>
-          <h1 className="auth-title">함께 시작해요</h1>
-          <p className="auth-subtitle">
-            계정을 만들어 상담 기록을 보관하고 언제든 이어갈 수 있어요.
-          </p>
+          <Link href="/" className="auth-wordmark" style={{ fontSize: "28px", letterSpacing: "3px" }}>MAJU</Link>
+          <h1 className="auth-title">회원가입</h1>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
@@ -83,7 +80,7 @@ export default function SignupPage() {
           )}
 
           <div className="auth-field">
-            <label htmlFor="name" className="auth-label">이름</label>
+            <label htmlFor="name" className="auth-label">닉네임</label>
             <input
               id="name"
               type="text"
@@ -92,7 +89,7 @@ export default function SignupPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="auth-input"
-              placeholder="홍길동"
+              placeholder="닉네임을 입력하세요"
               disabled={loading}
             />
           </div>
@@ -152,14 +149,8 @@ export default function SignupPage() {
         <div className="auth-divider" aria-hidden="true" />
 
         <p className="auth-footer-text">
-          이미 계정이 있으신가요?{" "}
-          <Link href="/auth/login">로그인</Link>
-        </p>
-
-        <p className="auth-footer-text">
-          <Link href="/survey" style={{ color: "var(--text-tertiary)" }}>
-            가입 없이 상담 먼저 해보기 →
-          </Link>
+          이미 계정이 있으신가요? {" "}
+          <Link href="/">로그인</Link>
         </p>
       </div>
     </div>

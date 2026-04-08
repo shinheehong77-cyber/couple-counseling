@@ -1,6 +1,6 @@
-# Couples Counseling App — Design System
+# 마주 (Maju) — Design System
 
-> This document is the single source of truth for the visual and interaction design of the couples counseling app. All UI work (Designer agent, Frontend Engineer agent, any human contributor) **must** read this file before writing CSS, Tailwind classes, or component code. Deviations require an explicit reason documented in the related issue.
+> This document is the single source of truth for the visual and interaction design of 마주 (Maju). All UI work (Designer agent, Frontend Engineer agent, any human contributor) **must** read this file before writing CSS, Tailwind classes, or component code. Deviations require an explicit reason documented in the related issue.
 
 ---
 
