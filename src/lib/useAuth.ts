@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import type { UserMode } from "@/types/user";
 
 interface AuthUser {
   id: string;
   name: string;
   email: string;
   coupleId?: string | null;
+  userMode?: UserMode | null;
+  onboardedAt?: string | null;
 }
 
 interface UseAuthResult {
@@ -22,6 +25,7 @@ interface UseAuthResult {
  */
 export function useAuth(): UseAuthResult {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -49,6 +53,11 @@ export function useAuth(): UseAuthResult {
         if (!cancelled) {
           setUser(data.user);
           setLoading(false);
+
+          /* Redirect to onboarding if user hasn't chosen a mode yet */
+          if (!data.user.onboardedAt && pathname !== "/onboarding") {
+            router.replace("/onboarding");
+          }
         }
       } catch {
         if (!cancelled) {
@@ -60,7 +69,7 @@ export function useAuth(): UseAuthResult {
 
     void check();
     return () => { cancelled = true; };
-  }, [router]);
+  }, [router, pathname]);
 
   return { user, loading };
 }

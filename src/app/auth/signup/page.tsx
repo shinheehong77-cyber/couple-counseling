@@ -17,7 +17,7 @@ export default function SignupPage() {
     setError("");
 
     if (password.length < 6) {
-      setError("비밀번호는 6자 이상이어야 합니다.");
+      setError("비밀번호는 6자 이상이어야 해요.");
       return;
     }
 
@@ -33,21 +33,21 @@ export default function SignupPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "가입에 실패했습니다. 다시 시도해주세요.");
+        setError(data.error || "가입에 실패했어요. 다시 시도해 주세요.");
         return;
       }
 
-      router.push("/dashboard");
+      router.push("/onboarding");
       router.refresh();
     } catch {
-      setError("연결에 문제가 생겼습니다. 잠시 후 다시 시도해주세요.");
+      setError("연결에 문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="auth-page" style={{ position: "relative" }}>
+    <div className="auth-page">
       {/* Back to landing */}
       <Link href="/" className="auth-back-link">
         <svg
@@ -68,7 +68,7 @@ export default function SignupPage() {
 
       <div className="auth-card">
         <div className="auth-header">
-          <Link href="/" className="auth-wordmark" style={{ fontSize: "28px", letterSpacing: "3px" }}>MAJU</Link>
+          <Link href="/" className="auth-wordmark">MAJU</Link>
           <h1 className="auth-title">회원가입</h1>
         </div>
 
@@ -112,16 +112,7 @@ export default function SignupPage() {
           <div className="auth-field">
             <label htmlFor="password" className="auth-label">
               비밀번호
-              <span
-                style={{
-                  marginLeft: "var(--space-2)",
-                  fontWeight: 400,
-                  color: "var(--text-tertiary)",
-                  fontSize: "var(--text-xs)",
-                }}
-              >
-                6자 이상
-              </span>
+              <span className="auth-password-hint">6자 이상</span>
             </label>
             <input
               id="password"

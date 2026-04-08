@@ -290,6 +290,18 @@ export default function DashboardPage() {
           </div>
         </section>
 
+        {/* ========== Solo mode banner ========== */}
+        {!isCoupleMode && (
+          <div className="dashboard-solo-banner">
+            <p className="dashboard-solo-banner-text">
+              파트너와 함께 상담을 받으면 더 효과적이에요
+            </p>
+            <Link href="/couple" className="dashboard-solo-banner-link">
+              함께하기
+            </Link>
+          </div>
+        )}
+
         {/* ========== 3. 개인 상담하기 ========== */}
         <Link
           href={hasSurvey ? "/chat" : "/survey"}
