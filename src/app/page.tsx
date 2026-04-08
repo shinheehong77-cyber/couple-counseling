@@ -52,7 +52,7 @@ export default function LoginPage() {
             <div className="auth-brand-wordmark">MAJU</div>
             <p className="auth-brand-tagline">서로를 마주보는 시간</p>
             <p className="auth-brand-desc">
-              신뢰도 높은 과학적 접근을 통한 관계 개선을 도와드려요.
+              서로에 대한 이해를 통해 관계 개선을 도와드려요.
             </p>
           </div>
 
