@@ -117,7 +117,7 @@ export default function DashboardPage() {
           : { totalSessions: 0 };
 
         let recentSession: SessionItem | null = null;
-        const sessionsRes = await fetch(`/api/sessions?userId=${authUser.id}`);
+        const sessionsRes = await fetch(`/api/sessions?userId=${authUser!.id}`);
         if (sessionsRes.ok) {
           const sessions = await sessionsRes.json();
           if (Array.isArray(sessions) && sessions.length > 0) {
