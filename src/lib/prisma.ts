@@ -9,7 +9,7 @@ function createPrismaClient() {
 
   const adapter = new PrismaLibSql({
     url,
-    ...(authToken ? { authToken } : {}),
+    authToken: authToken || undefined,
   });
   return new PrismaClient({ adapter });
 }
