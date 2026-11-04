@@ -1,4 +1,5 @@
 import { startCapture, startRecorder } from "./audio.js";
+import { createLocal } from "./local-stt.js";
 import { createDemo, createSoniox, createWebSpeech } from "./stt.js";
 
 const $view = document.getElementById("view");
@@ -73,7 +74,7 @@ async function refreshStatus() {
   try { status = await api("/api/status"); } catch {}
   document.getElementById("status").innerHTML = `
     <span class="pill ${status.llm ? "on" : "off"}" title="${esc(status.models?.live || "")}">${status.llm ? "분석 켜짐" : "오프라인 분석"}</span>
-    <span class="pill ${status.stt.soniox ? "on" : "off"}">${status.stt.soniox ? "음성인식 Soniox" : "음성인식: 내장/데모"}</span>
+    <span class="pill ${status.stt.local || status.stt.soniox ? "on" : "off"}">${status.stt.local ? "로컬 전사 켜짐" : status.stt.soniox ? "음성인식 Soniox" : "로컬 전사 꺼짐"}</span>
     <span class="pill">내 자료 ${status.kb.docs}건</span>`;
 }
 
@@ -85,7 +86,8 @@ const LANGS = [["ko", "한국어"], ["en", "영어"], ["ja", "일본어"], ["zh"
 // ─────────────────────────────── 새 콜 ───────────────────────────────
 function viewSetup() {
   const last = store.get("lastSetup", {});
-  const mode = status.stt.soniox ? last.mode || "soniox" : last.mode === "browser" ? "browser" : "demo";
+  const available = { local: status.stt.local, soniox: status.stt.soniox, browser: true, demo: true };
+  const mode = available[last.mode] ? last.mode : status.stt.local ? "local" : status.stt.soniox ? "soniox" : "demo";
   $view.innerHTML = `
   <div class="page">
     <h1>새 콜</h1>
@@ -102,8 +104,10 @@ function viewSetup() {
         </div>
         <div class="field"><span class="label">음성 입력 방식</span>
           <div class="choices">
+            <label class="choice ${status.stt.local ? "" : "disabled"}"><input type="radio" name="mode" value="local" ${mode === "local" ? "checked" : ""} ${status.stt.local ? "" : "disabled"}/>
+              <div><strong>로컬 전사 (권장)</strong><span>이 컴퓨터에서 Whisper 모델이 직접 전사해요. 녹음이 외부로 나가지 않고 무료예요. 내 마이크와 상대 소리를 따로 받아 화자를 구분해요. ${status.stt.local ? "" : "— 터미널에서 <code>npm run stt</code> 로 전사 엔진을 먼저 켜주세요"}</span></div></label>
             <label class="choice ${status.stt.soniox ? "" : "disabled"}"><input type="radio" name="mode" value="soniox" ${mode === "soniox" ? "checked" : ""} ${status.stt.soniox ? "" : "disabled"}/>
-              <div><strong>실시간 음성인식 (권장)</strong><span>내 마이크 + 상대 소리(회의 탭/시스템 오디오)를 따로 인식해 화자를 구분해요. 한·영 섞여도 돼요. ${status.stt.soniox ? "" : "— SONIOX_API_KEY 설정 필요"}</span></div></label>
+              <div><strong>클라우드 음성인식 (Soniox)</strong><span>단어 단위로 가장 빠르게 뜨고 한·영 혼용·화자 분리가 강해요. 오디오가 Soniox 서버로 전송돼요. ${status.stt.soniox ? "" : "— SONIOX_API_KEY 설정 필요"}</span></div></label>
             <label class="choice"><input type="radio" name="mode" value="browser" ${mode === "browser" ? "checked" : ""}/>
               <div><strong>브라우저 내장 인식</strong><span>무료. Chrome 마이크만, 한 가지 언어만. 스피커폰 통화나 대면 미팅용.</span></div></label>
             <label class="choice"><input type="radio" name="mode" value="demo" ${mode === "demo" ? "checked" : ""}/>
@@ -222,7 +226,11 @@ async function startLive(call, opts) {
   live.capture = capture;
   if (opts.record) live.recorder = startRecorder(capture.mix, call.id, (e) => toast(e.message));
 
-  if (opts.mode === "soniox") {
+  if (opts.mode === "local") {
+    const both = capture.sources.mic && capture.sources.system;
+    if (capture.sources.system) live.streams.push(await createLocal(capture.sources.system, { label: "상대", callId: call.id, startedAt, handlers }));
+    if (capture.sources.mic) live.streams.push(await createLocal(capture.sources.mic, { label: both ? "나" : "마이크", callId: call.id, startedAt, handlers }));
+  } else if (opts.mode === "soniox") {
     const both = capture.sources.mic && capture.sources.system;
     if (capture.sources.system) {
       live.streams.push(await createSoniox(capture.sources.system, { label: "상대", diarize: true, languages: call.languages, context, startedAt, handlers }));

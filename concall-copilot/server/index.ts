@@ -6,6 +6,7 @@ import { config, llmEnabled } from "./config.ts";
 import * as engine from "./engine.ts";
 import { kb } from "./kb.ts";
 import { store } from "./store.ts";
+import { localSttHealthy, transcribeLocal } from "./local-stt.ts";
 import { sonioxTemporaryKey } from "./stt.ts";
 import type { Segment } from "./types.ts";
 import { newId } from "./util.ts";
@@ -84,11 +85,11 @@ const route = (method: string, pattern: string, handler: Handler) =>
   routes.push([method, new RegExp("^" + pattern.replace(/:\w+/g, "([^/]+)") + "$"), handler]);
 
 // ── status ──
-route("GET", "/api/status", (_req, res) =>
+route("GET", "/api/status", async (_req, res) =>
   send(res, 200, {
     llm: llmEnabled(),
     models: { live: config.liveModel, deep: config.deepModel },
-    stt: { soniox: Boolean(config.sonioxKey) },
+    stt: { soniox: Boolean(config.sonioxKey), local: await localSttHealthy(), localUrl: config.localSttUrl },
     kb: { docs: kb.list().length, chunks: kb.chunkCount, folders: config.kbDirs },
   }),
 );
@@ -163,6 +164,22 @@ route("GET", "/api/calls/:id/export.md", (_req, res, [id]) => {
 });
 
 // ── speech-to-text ──
+// 로컬 전사: 브라우저가 자른 발화 WAV → 로컬 whisper → 발화로 저장 (오디오는 외부로 나가지 않음)
+route("POST", "/api/calls/:id/stt-local", async (req, res, [id], url) => {
+  const call = store.getCall(id);
+  if (!call) return send(res, 404, { error: "콜을 찾을 수 없어요" });
+  const wav = await readBody(req, 10 * 1024 * 1024);
+  const recent = store.getSegments(id).slice(-3).map((s) => s.text).join(" ");
+  const prompt = [call.counterparty, call.title, recent].filter(Boolean).join(". ");
+  const text = await transcribeLocal(wav, { languages: call.languages, prompt });
+  if (text) {
+    engine.addSegments(id, [
+      { id: newId("s_"), speaker: (url.searchParams.get("speaker") || "상대").slice(0, 20), text, t: Number(url.searchParams.get("t")) || 0 },
+    ]);
+  }
+  send(res, 200, { text });
+});
+
 route("POST", "/api/stt/soniox-key", async (_req, res) => send(res, 200, await sonioxTemporaryKey()));
 
 // ── knowledge base ──

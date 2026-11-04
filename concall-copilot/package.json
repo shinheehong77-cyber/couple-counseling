@@ -9,7 +9,8 @@
     "start": "tsx server/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test test/*.test.ts",
-    "e2e": "node --import tsx test/e2e-demo.ts"
+    "e2e": "node --import tsx test/e2e-demo.ts && node --import tsx test/e2e-local.ts",
+    "stt": "bash scripts/local-stt.sh"
   },
   "engines": {
     "node": ">=20"

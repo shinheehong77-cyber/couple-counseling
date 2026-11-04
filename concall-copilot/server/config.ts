@@ -29,6 +29,10 @@ export const config = {
   liveModel: env("LIVE_MODEL", "claude-opus-5-5"),
   deepModel: env("DEEP_MODEL", "claude-opus-5-5"),
   sonioxKey: env("SONIOX_API_KEY"),
+  /** 로컬 전사 서버 (whisper.cpp whisper-server 기본 포트를 8178 로 띄우는 것을 권장) */
+  localSttUrl: env("LOCAL_STT_URL", "http://127.0.0.1:8178"),
+  localSttApi: env("LOCAL_STT_API", "whispercpp") as "whispercpp" | "openai",
+  localSttModel: env("LOCAL_STT_MODEL", "whisper-1"),
   kbDirs: env("KB_DIRS")
     .split(",")
     .map((s) => s.trim())

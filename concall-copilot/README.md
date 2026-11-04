@@ -7,7 +7,8 @@
 - 판단 보조 카드: **판단 포인트 · 지금 물어볼 질문 · 기술 해석 · 숫자 · 내 자료 · 웹 확인**
 - 통화 중 묻기: "방금 말한 수율이 경쟁사보다 높은 거 맞아?" → 대화 + 내 자료 + 웹을 근거로 답변
 - 사전 브리핑, 콜 종료 시 콜 메모 자동 작성 → 자동으로 "내 자료"에 저장되어 다음 콜에서 비교에 쓰임
-- 녹음·자막·메모는 모두 이 컴퓨터의 `data/` 폴더에만 저장
+- **로컬 전사(기본 권장)**: 이 컴퓨터에서 Whisper 모델이 직접 전사 — 녹음이 외부로 나가지 않고 무료
+- 녹음·자막·메모는 모두 이 컴퓨터의 `data/` 폴더에만 저장 (외부로 나가는 건 Claude 분석용 **텍스트**뿐)
 
 기획 배경(기존 서비스 조사)과 설계는 [docs/PLAN.md](docs/PLAN.md)에 있습니다.
 
@@ -27,12 +28,33 @@ npm start          # → http://localhost:4100
 
 ## 실제 통화에 쓰기
 
+### 1. 로컬 전사 엔진 켜기 (권장)
+
+Mac(Apple Silicon) 기준:
+
+```bash
+brew install whisper-cpp      # 처음 한 번
+npm run stt                   # 처음 실행 때 모델(약 550MB) 자동 다운로드 → 127.0.0.1:8178 에서 대기
+```
+
+다른 터미널에서 `npm start` 하면 "새 콜" 화면에 **로컬 전사 (권장)**이 켜집니다.
+
+- 모델: whisper large-v3-turbo (q5_0 양자화). 한국어·영어 모두 지원, M1 이상이면 발화 하나를 1초 안팎에 전사
+- 더 정확하게: `WHISPER_MODEL=large-v3-turbo npm run stt` / 가벼운 노트북: `WHISPER_MODEL=small npm run stt`
+- 브라우저가 말소리 구간을 잘라(0.7초 쉬면 끊음) 보내므로, 자막은 **문장 단위로 1~3초 늦게** 뜹니다. 단어 단위 실시간 자막이 필요하면 Soniox 모드를 쓰세요
+- 내 마이크와 상대 소리를 따로 전사해서 "나"/"상대"를 구분합니다 (Whisper 자체엔 화자 분리가 없음)
+- 무음에서 Whisper가 지어내는 문구("시청해주셔서 감사합니다" 등)는 자동으로 걸러요
+- whisper.cpp 대신 OpenAI 호환 로컬 서버(speaches, MLX 기반 서버 등)를 쓰려면 `.env`에 `LOCAL_STT_API=openai`, `LOCAL_STT_URL=...`
+
+### 2. 키 설정
+
 `.env.example`을 `.env`로 복사하고 채웁니다.
 
 | 변수 | 용도 | 없으면 |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | 실시간 카드, 웹 확인, 묻기, 브리핑, 콜 메모 (Claude) | 오프라인 규칙 기반 |
-| `SONIOX_API_KEY` | 실시간 음성인식 (한·영 혼용, 화자 분리, 시간당 약 $0.12) | 브라우저 내장 인식(Chrome, 마이크만, 한 언어) |
+| `LOCAL_STT_URL` | 로컬 전사 엔진 주소 (기본 `http://127.0.0.1:8178`) | |
+| `SONIOX_API_KEY` | (선택) 클라우드 음성인식 — 단어 단위로 가장 빠름, 한·영 혼용·화자 분리 강함. 오디오가 Soniox로 전송됨 | 로컬 전사 / 브라우저 내장 인식 |
 | `KB_DIRS` | 내 메모 폴더(Obsidian 등) 자동 색인. 쉼표로 여러 개 | 화면에서 직접 올리기 |
 | `LIVE_MODEL` / `DEEP_MODEL` | 기본 `claude-opus-5-5`. 카드가 늦게 느껴지면 `LIVE_MODEL`을 `claude-sonnet-5-5`나 `claude-haiku-5-5`로 바꿔 비교해 보세요 | |
 
@@ -62,12 +84,15 @@ concall-copilot/
     prompts.ts    시스템 프롬프트 (카드 정의)
     kb.ts         내 자료 색인/검색 (BM25)
     mock.ts       오프라인 규칙 기반 카드
+    local-stt.ts  로컬 전사 엔진 연결 (whisper.cpp / OpenAI 호환), 환각 문구 필터
     stt.ts        Soniox 임시 키 발급
     store.ts      data/ 파일 저장
   public/         브라우저 화면 (빌드 없음)
     audio.js      마이크/회의 소리 캡처, 녹음 업로드
+    local-stt.js  말소리 구간 감지(VAD) → 16kHz WAV → 로컬 전사
     stt.js        Soniox · 브라우저 내장 · 데모 음성인식
     app.js        화면 (새 콜, 콜, 지난 콜, 내 자료)
+  scripts/        local-stt.sh — 로컬 전사 엔진 설치 확인·모델 다운로드·실행
   samples/        데모 콜 대본, 데모용 가상 자료
   test/           단위 테스트, 브라우저 E2E
 ```
@@ -77,6 +102,6 @@ concall-copilot/
 ```bash
 npm run dev        # 파일 변경 시 자동 재시작
 npm test           # 단위 테스트 (토크나이저, BM25, 오프라인 카드)
-npm run e2e        # Playwright로 데모 콜 전체 흐름 확인 + 스크린샷(test-results/)
+npm run e2e        # Playwright: 데모 콜 전체 흐름 + 로컬 전사 경로(가짜 마이크 → VAD → WAV → whisper 형식 서버)
 npm run typecheck
 ```
