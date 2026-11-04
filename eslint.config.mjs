@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 별도 프로젝트 (자체 package.json / tsconfig)
+    "concall-copilot/**",
   ]),
 ]);
 
