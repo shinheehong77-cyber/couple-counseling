@@ -17,7 +17,8 @@ export type CardType =
   | "kb" // 내 자료와의 연결/불일치
   | "web" // 웹 확인 결과
   | "answer" // 내가 직접 물어본 것에 대한 답
-  | "brief"; // 사전 브리핑
+  | "brief" // 사전 브리핑
+  | "bookmark"; // 내가 📌 표시한 순간
 
 export interface Source {
   title: string;
@@ -39,7 +40,9 @@ export interface Card {
   /** ms since call start when created (for timeline) */
   t?: number;
   status?: "pending" | "done" | "error";
-  origin: "live" | "web" | "ask" | "brief" | "mock";
+  origin: "live" | "web" | "ask" | "brief" | "mock" | "user";
+  /** 사용자 피드백 (👍/👎) — 이후 카드 생성에 반영 */
+  feedback?: "up" | "down";
 }
 
 export interface CallMeta {

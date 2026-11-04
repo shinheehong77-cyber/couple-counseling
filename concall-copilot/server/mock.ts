@@ -39,7 +39,7 @@ const QUESTION_HINTS: { re: RegExp; q: string }[] = [
 
 export function mockCards(fresh: Segment[], kbHits: KbHit[], seenTitles: Set<string>): LiveCardOut[] {
   const cards: LiveCardOut[] = [];
-  const theirs = fresh.filter((s) => s.speaker !== "나");
+  const theirs = fresh.filter((s) => s.speaker !== "나" && s.speaker !== "메모");
   const text = theirs.map((s) => s.text).join(" ");
   const lower = text.toLowerCase();
 

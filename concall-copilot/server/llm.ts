@@ -73,6 +73,7 @@ export async function liveCards(input: {
   fresh: Segment[];
   kbHits: KbHit[];
   existing: Card[];
+  feedback?: string;
 }): Promise<LiveCardOut[]> {
   const existingList = input.existing.length
     ? input.existing.slice(-30).map((c) => `- [${c.type}] ${c.title}`).join("\n")
@@ -100,6 +101,7 @@ export async function liveCards(input: {
               `[새 발언 — 이번에 분석할 부분]\n${formatSegments(input.fresh)}\n\n` +
               `[내 자료 중 관련 대목]\n${formatKb(input.kbHits)}\n\n` +
               `[이미 띄운 카드]\n${existingList}\n\n` +
+              (input.feedback ? `[사용자 피드백]\n${input.feedback}\n\n` : "") +
               `새 발언을 기준으로 지금 사용자에게 필요한 카드를 만드세요. 지연 민감: 바로 답하세요.`,
           },
         ],
@@ -207,7 +209,10 @@ export function brief(input: { call: CallMeta; kbHits: KbHit[] }): Promise<Resea
 }
 
 export async function summarize(input: { call: CallMeta; transcript: Segment[]; cards: Card[]; kbHits: KbHit[] }): Promise<string> {
-  const cards = input.cards.map((c) => `- [${c.type}] ${c.title}: ${c.body}`).join("\n") || "(없음)";
+  const cards =
+    input.cards
+      .map((c) => `- [${c.type}${c.feedback === "up" ? " 👍" : c.feedback === "down" ? " 👎" : ""}] ${c.t != null ? formatClock(c.t) + " " : ""}${c.title}: ${c.body}`)
+      .join("\n") || "(없음)";
   const res = await research({
     system: SUMMARY_SYSTEM,
     user:

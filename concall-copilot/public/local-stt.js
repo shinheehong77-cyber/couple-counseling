@@ -37,7 +37,7 @@ function downsample(input, fromRate) {
  * - 주변 소음 수준을 따라가며 그보다 충분히 큰 소리를 말소리로 본다.
  * - 0.7초 쉬면 발화 끝, 15초 넘으면 다음 짧은 쉼에서 강제로 자른다.
  */
-export async function createLocal(stream, { label, callId, startedAt, handlers }) {
+export async function createLocal(stream, { label, callId, startedAt, handlers, previewMs = 2500 }) {
   const ctx = new AudioContext();
   await ctx.audioWorklet.addModule("/pcm-worklet.js");
   const src = ctx.createMediaStreamSource(stream);
@@ -59,14 +59,35 @@ export async function createLocal(stream, { label, callId, startedAt, handlers }
   const preroll = [];
   let inflight = 0;
   let warned = false;
+  let previewing = false;
+  let lastPreviewAt = 0;
+  let utterance = 0; // 미리보기 응답이 늦게 와도 지난 발화에 덮어쓰지 않도록
 
-  const send = (frames, wallStart, voicedMs) => {
-    if (voicedMs < 400) return; // 짧은 잡음은 버림
+  const toWav = (frames) => {
     const total = frames.reduce((n, f) => n + f.length, 0);
     const pcm = new Float32Array(total);
     let o = 0;
     for (const f of frames) { pcm.set(f, o); o += f.length; }
-    const wav = encodeWav(downsample(pcm, rate));
+    return encodeWav(downsample(pcm, rate));
+  };
+
+  // 긴 발화는 말하는 도중에도 몇 초마다 미리 전사해서 보여준다 (저장하지 않음).
+  // 확정 전사가 밀리지 않도록, 확정 요청이 진행 중이면 건너뛴다.
+  const preview = () => {
+    if (!previewMs || previewing || inflight || chunk.length * frameMs < 3000 || Date.now() - lastPreviewAt < previewMs) return;
+    previewing = true;
+    lastPreviewAt = Date.now();
+    const mine = utterance;
+    fetch(`/api/calls/${callId}/stt-local?preview=1&speaker=${encodeURIComponent(label)}`, { method: "POST", body: toWav(chunk) })
+      .then((r) => r.json())
+      .then((d) => { if (mine === utterance && speaking && d.text) handlers.onPartial(label, label, d.text + " …"); })
+      .catch(() => {})
+      .finally(() => { previewing = false; });
+  };
+
+  const send = (frames, wallStart, voicedMs) => {
+    if (voicedMs < 400) return; // 짧은 잡음은 버림
+    const wav = toWav(frames);
     inflight++;
     handlers.onPartial(label, label, "…전사 중");
     fetch(`/api/calls/${callId}/stt-local?speaker=${encodeURIComponent(label)}&t=${Math.max(0, wallStart - startedAt)}`, { method: "POST", body: wav })
@@ -85,6 +106,7 @@ export async function createLocal(stream, { label, callId, startedAt, handlers }
   };
 
   const flush = () => {
+    utterance++;
     if (chunk.length) send(chunk, chunkStartWall, speechMs);
     chunk = [];
     speaking = false;
@@ -118,6 +140,7 @@ export async function createLocal(stream, { label, callId, startedAt, handlers }
     if (isSpeech) { speechMs += frameMs; silenceMs = 0; } else silenceMs += frameMs;
     const pauseLimit = durMs > 10_000 ? 200 : 700;
     if (silenceMs >= pauseLimit || durMs >= 20_000) flush();
+    else preview();
   };
 
   return {

@@ -244,3 +244,17 @@ audio { width: 100%; height: 36px; }
 .linklike { background: none; border: 0; padding: 0; text-align: left; color: var(--text); cursor: pointer; max-width: 100%; }
 .doc-text { margin-top: 10px; padding: 10px 12px; background: var(--surface-2); border-radius: var(--radius-sm); font-size: 13.5px; max-height: 360px; overflow-y: auto; }
 [hidden]{display:none !important;}
+
+.seg.note .who { color: var(--accent); }
+.seg.note .txt { color: var(--accent); }
+.icard.t-bookmark { --c: var(--accent); }
+.icard .foot { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+.icard .foot:empty { display: none; }
+.icard .fb { margin-left: auto; display: inline-flex; gap: 2px; opacity: 0.45; transition: opacity 150ms; }
+.icard:hover .fb, .icard .fb:focus-within { opacity: 1; }
+.fbtn { background: none; border: 1px solid transparent; border-radius: var(--radius-sm); min-width: 32px; min-height: 30px; font-size: 14px; filter: grayscale(1); }
+.fbtn.on { border-color: var(--border-strong); filter: none; }
+.icard .copy { margin-top: 0; }
+.icard.fb-down { opacity: 0.5; }
+.icard.fb-down .body, .icard.fb-down .quote, .icard.fb-down .srcs { display: none; }
+.icard.fb-down .fb { opacity: 1; }

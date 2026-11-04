@@ -136,10 +136,17 @@ function viewSetup() {
           <li><strong>내 자료</strong> — 지난 콜 메모·리서치 노트의 관련 대목</li>
           <li><strong>웹 확인</strong> — 공개 정보로 사실 확인 (출처 포함)</li>
         </ul>
+        <h2>통화 중 쓸 수 있는 것</h2>
+        <ul>
+          <li><strong>📌 표시</strong> (Option/Alt + B) — 중요한 순간을 찍어두면 콜 메모에 따로 정리</li>
+          <li><strong>메모</strong> — 혼자 적어두는 생각. 분석과 콜 메모에 반영</li>
+          <li><strong>👍 / 👎</strong> — 카드 피드백. 다음 카드부터 취향에 맞춰져요</li>
+        </ul>
         <h2>상대 소리 가져오는 법</h2>
         <ul>
           <li>Zoom·Teams·Meet <strong>웹</strong>으로 들어가면: 공유 창에서 그 탭을 고르고 "탭 오디오 공유" 체크</li>
-          <li>데스크톱 앱(Zoom 등)이면: Windows는 "전체 화면 + 시스템 오디오 공유", Mac은 BlackHole 같은 가상 오디오 장치를 쓰거나 웹 버전 사용</li>
+          <li>Zoom·Teams <strong>데스크톱 앱</strong>이면: 공유 창에서 "전체 화면"을 고르고 "시스템 오디오도 공유" 체크 (Mac은 macOS 14.2 이상 + Chrome 141 이상)</li>
+          <li>그래도 상대 소리가 안 잡히면 Mac은 BlackHole 같은 가상 오디오 장치를 쓰거나 웹 버전으로 들어가세요</li>
           <li>전화·대면 미팅은 스피커폰으로 두고 "내 마이크"만 켜도 돼요</li>
         </ul>
         <p class="muted">녹음·자막·메모는 이 컴퓨터의 <code>data/</code> 폴더에만 저장돼요. 녹음 전에 상대방 동의를 받는 것을 잊지 마세요.</p>
@@ -257,7 +264,7 @@ async function stopLive() {
 
 // ─────────────────────────────── 콜 화면 (실시간 + 다시 보기) ───────────────────────────────
 let es = null;
-const TYPE_NAMES = { judgment: "판단", question: "질문", tech: "기술", number: "숫자", kb: "내 자료", web: "웹 확인", answer: "답변", brief: "브리핑" };
+const TYPE_NAMES = { judgment: "판단", question: "질문", tech: "기술", number: "숫자", kb: "내 자료", web: "웹 확인", answer: "답변", brief: "브리핑", bookmark: "📌 표시" };
 
 async function viewCall(id) {
   const data = await api(`/api/calls/${id}`);
@@ -278,6 +285,7 @@ async function viewCall(id) {
       <span class="analyzing" id="analyzing"></span>
       <span class="spacer"></span>
       ${isLive ? `
+        <button class="btn small" id="mark" title="지금 이 순간 표시 (Option/Alt + B)">📌 표시</button>
         <button class="btn small" id="brief">사전 브리핑</button>
         <button class="btn small" id="pause">일시정지</button>
         <button class="btn small danger" id="end">종료 & 메모</button>` : `
@@ -301,8 +309,9 @@ async function viewCall(id) {
         </div>
         <div class="scroll"><div class="cards" id="cards"></div></div>
         <form class="askbar" id="ask">
-          <input name="q" autocomplete="off" placeholder="통화 중 궁금한 것 — 예: 방금 말한 수율이 경쟁사보다 높은 거 맞아?" />
-          <button class="btn primary" type="submit">묻기</button>
+          <input name="q" autocomplete="off" placeholder="궁금한 것은 ‘묻기’, 혼자 적어둘 것은 ‘메모’ (상대에게 안 보여요)" />
+          <button class="btn primary" type="submit" value="ask">묻기</button>
+          <button class="btn" type="submit" value="note" title="통화 중 내 메모 — 분석과 콜 메모에 반영돼요">메모</button>
         </form>
       </section>
     </div>`;
@@ -310,7 +319,7 @@ async function viewCall(id) {
   const $t = document.getElementById("transcript");
   const $cards = document.getElementById("cards");
 
-  const segHtml = (s) => `<div class="seg ${s.speaker === "나" ? "me" : ""}" data-t="${s.t}"><span class="t">${clock(s.t)}</span><div><span class="who">${esc(s.speaker)}</span><span class="txt">${esc(s.text)}</span></div></div>`;
+  const segHtml = (s) => `<div class="seg ${s.speaker === "나" ? "me" : s.speaker === "메모" ? "note" : ""}" data-t="${s.t}"><span class="t">${clock(s.t)}</span><div><span class="who">${esc(s.speaker)}</span><span class="txt">${esc(s.text)}</span></div></div>`;
   const nearBottom = () => $t.scrollHeight - $t.scrollTop - $t.clientHeight < 80;
   const renderTranscript = () => {
     $t.innerHTML = segments.length ? segments.map(segHtml).join("") + `<div id="partials"></div>` : `<div class="empty">${isLive ? "말소리를 기다리고 있어요…" : "저장된 자막이 없어요."}</div><div id="partials"></div>`;
@@ -332,14 +341,17 @@ async function viewCall(id) {
     const long = c.type === "answer" || c.type === "brief" || c.type === "web";
     const fresh = !shown.has(c.id);
     shown.add(c.id);
-    return `<article class="icard t-${c.type} p${c.priority} ${fresh ? "fresh" : ""} ${c.status === "pending" ? "pending" : ""} ${pins.has(c.id) ? "pinned" : ""}" data-id="${c.id}">
+    const fb = c.type === "bookmark" ? "" : `<span class="fb">
+        <button class="fbtn ${c.feedback === "up" ? "on" : ""}" data-fb="up" data-cid="${c.id}" aria-label="유용해요" title="유용해요">👍</button>
+        <button class="fbtn ${c.feedback === "down" ? "on" : ""}" data-fb="down" data-cid="${c.id}" aria-label="필요 없어요" title="필요 없어요 — 비슷한 카드를 줄여요">👎</button></span>`;
+    return `<article class="icard t-${c.type} p${c.priority} ${fresh ? "fresh" : ""} ${c.status === "pending" ? "pending" : ""} ${pins.has(c.id) ? "pinned" : ""} ${c.feedback === "down" ? "fb-down" : ""}" data-id="${c.id}">
       <div class="head"><span class="kind">${TYPE_NAMES[c.type] || c.type}</span><span class="ttl">${esc(c.title)}</span>
         ${c.t != null ? `<button class="when" data-jump="${c.t}" title="자막에서 보기">${clock(c.t)}</button>` : ""}
         <button class="pin ${pins.has(c.id) ? "on" : ""}" data-pin="${c.id}" aria-label="고정">${pins.has(c.id) ? "★" : "☆"}</button></div>
-      <div class="body">${long ? md(c.body) : esc(c.body)}</div>
+      <div class="body">${long ? md(c.body) : c.type === "bookmark" ? esc(c.body).replace(/\n/g, "<br/>") : esc(c.body)}</div>
       ${c.quote ? `<div class="quote">“${esc(c.quote)}”</div>` : ""}
       ${srcs ? `<div class="srcs">${srcs}</div>` : ""}
-      ${c.type === "question" ? `<button class="copy" data-copy="${esc(c.title)}">복사</button>` : ""}
+      <div class="foot">${c.type === "question" ? `<button class="copy" data-copy="${esc(c.title)}">복사</button>` : ""}${fb}</div>
     </article>`;
   };
   const renderCards = () => {
@@ -367,6 +379,18 @@ async function viewCall(id) {
     renderCards();
   };
   $cards.onclick = async (e) => {
+    const fbBtn = e.target.closest("[data-fb]");
+    if (fbBtn) {
+      const c = cards.get(fbBtn.dataset.cid);
+      const value = c?.feedback === fbBtn.dataset.fb ? null : fbBtn.dataset.fb;
+      try {
+        const next = await api(`/api/calls/${id}/cards/${fbBtn.dataset.cid}/feedback`, { method: "POST", body: JSON.stringify({ value }) });
+        cards.set(next.id, next);
+        renderCards();
+        if (value === "down") toast("비슷한 카드는 줄일게요.");
+      } catch (err) { toast(err.message); }
+      return;
+    }
     const pin = e.target.closest("[data-pin]");
     if (pin) {
       const cid = pin.dataset.pin;
@@ -400,14 +424,27 @@ async function viewCall(id) {
   };
   document.querySelector(".tabs-mobile").onclick = (e) => { const b = e.target.closest("[data-tab]"); if (b) showTab(b.dataset.tab); };
 
+  const nowT = () => (live?.callId === id ? Date.now() - live.startedAt : segments[segments.length - 1]?.t ?? 0);
   document.getElementById("ask").onsubmit = async (e) => {
     e.preventDefault();
     const q = e.target.q.value.trim();
     if (!q) return;
     e.target.q.value = "";
+    if (e.submitter?.value === "note") {
+      api(`/api/calls/${id}/note`, { method: "POST", body: JSON.stringify({ text: q, t: nowT() }) }).catch((err) => toast(err.message));
+      return;
+    }
     filter = "all";
     api(`/api/calls/${id}/ask`, { method: "POST", body: JSON.stringify({ question: q }) }).catch((err) => toast(err.message));
   };
+  const mark = () =>
+    api(`/api/calls/${id}/bookmark`, { method: "POST", body: JSON.stringify({ t: nowT() }) })
+      .then(() => toast("📌 이 순간을 표시했어요. 콜 메모에 따로 정리돼요."))
+      .catch((err) => toast(err.message));
+  document.getElementById("mark")?.addEventListener("click", mark);
+  window.onkeydown = isLive
+    ? (e) => { if (e.altKey && e.code === "KeyB") { e.preventDefault(); mark(); } }
+    : null;
 
   document.getElementById("brief")?.addEventListener("click", () => api(`/api/calls/${id}/brief`, { method: "POST" }).catch((err) => toast(err.message)));
   document.getElementById("pause")?.addEventListener("click", (e) => {
@@ -571,6 +608,7 @@ async function route() {
   const params = new URLSearchParams(query || "");
   document.querySelectorAll("[data-nav]").forEach((a) => a.classList.toggle("active", a.dataset.nav === (parts[0] || "setup")));
   if (parts[0] !== "call") { es?.close(); es = null; }
+  window.onkeydown = null;
   try {
     if (parts[0] === "call" && parts[1]) await viewCall(parts[1]);
     else if (parts[0] === "calls") await viewCalls();

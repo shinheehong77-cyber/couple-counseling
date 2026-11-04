@@ -5,6 +5,7 @@
   "type": "module",
   "description": "콘콜(컨퍼런스콜) 실시간 보조 시스템 — 녹음, 실시간 자막, 판단 포인트/기술 해석/내 자료/웹 확인 카드",
   "scripts": {
+    "up": "bash scripts/up.sh",
     "dev": "tsx watch server/index.ts",
     "start": "tsx server/index.ts",
     "typecheck": "tsc --noEmit",

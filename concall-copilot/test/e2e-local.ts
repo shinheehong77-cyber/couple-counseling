@@ -29,6 +29,7 @@ function writeBurstWav(file: string) {
     }
   };
   for (let k = 0; k < 4; k++) { silence(0.8); burst(1.6, 180 + k * 40); silence(1.2); }
+  silence(0.5); burst(6.5, 260); silence(1.5); // 긴 발화 → 말하는 도중 미리보기 자막
   const buf = Buffer.alloc(44 + parts.length * 2);
   buf.write("RIFF", 0); buf.writeUInt32LE(36 + parts.length * 2, 4); buf.write("WAVE", 8);
   buf.write("fmt ", 12); buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20); buf.writeUInt16LE(1, 22);
@@ -75,6 +76,8 @@ const browser = await chromium.launch({
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   page.on("pageerror", (e: Error) => console.error("[pageerror]", e.message));
+  let previews = 0;
+  page.on("request", (r: { url(): string }) => { if (r.url().includes("preview=1")) previews++; });
   await page.goto(`http://127.0.0.1:${PORT}/#/`);
   await page.waitForSelector("text=로컬 전사 켜짐");
   await page.check("input[name=mode][value=local]");
@@ -82,7 +85,7 @@ try {
   await page.fill("#f-title", "로컬 전사 테스트");
   await page.click("#setup button[type=submit]");
 
-  await page.waitForFunction(() => document.querySelectorAll(".seg[data-t]").length >= 3, null, { timeout: 40000 });
+  await page.waitForFunction(() => document.querySelectorAll(".seg[data-t]").length >= 4, null, { timeout: 40000 });
   await page.waitForFunction(() => document.querySelectorAll(".icard").length >= 1, null, { timeout: 15000 });
   const segs = await page.$$eval(".seg[data-t] .txt", (els: Element[]) => els.map((e) => e.textContent));
   const who = await page.$$eval(".seg[data-t] .who", (els: Element[]) => [...new Set(els.map((e) => e.textContent))]);
@@ -92,6 +95,8 @@ try {
   if (!received[0]?.fields.includes("file") || !received[0]?.fields.includes("language")) throw new Error("whisper.cpp 요청 필드 누락");
   if (segs.some((t: string | null) => t?.includes("시청해주셔서"))) throw new Error("환각 문구가 걸러지지 않음");
   if (!who.includes("마이크")) throw new Error("화자 라벨 이상");
+  console.log("preview requests:", previews);
+  if (previews < 1) throw new Error("긴 발화에서 미리보기 자막 요청이 없음");
   await page.click("#end");
   await page.waitForSelector("#summary:not([hidden])", { timeout: 15000 });
   const call = (await (await fetch(`http://127.0.0.1:${PORT}/api/calls`)).json())[0];

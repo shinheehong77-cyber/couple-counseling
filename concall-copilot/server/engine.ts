@@ -8,6 +8,7 @@ import { config, llmEnabled } from "./config.ts";
 import { kb } from "./kb.ts";
 import * as llm from "./llm.ts";
 import { mockCards } from "./mock.ts";
+import { feedbackSummary, recordFeedback } from "./prefs.ts";
 import { store } from "./store.ts";
 import type { CallMeta, Card, Segment, Source } from "./types.ts";
 import { clip, newId } from "./util.ts";
@@ -103,7 +104,7 @@ async function runRound(callId: string): Promise<void> {
     const nowT = fresh[fresh.length - 1]?.t ?? 0;
 
     const out = llmEnabled()
-      ? await llm.liveCards({ call, earlier, fresh, kbHits, existing: store.getCards(callId) })
+      ? await llm.liveCards({ call, earlier, fresh, kbHits, existing: store.getCards(callId), feedback: feedbackSummary() })
       : mockCards(fresh, kbHits, s.seenTitles);
 
     for (const c of out) {
@@ -168,6 +169,40 @@ function maybeWebCheck(callId: string, call: CallMeta, origin: Card, query: stri
     .finally(() => {
       s.webChecksInFlight--;
     });
+}
+
+/** 📌 지금 이 순간 표시: 최근 30초 대화를 묶어 카드로 남기고 콜 메모에 반영. */
+export function bookmark(callId: string, t: number, note?: string): Card {
+  const s = session(callId);
+  const segs = store.getSegments(callId);
+  const nowT = t || segs[segs.length - 1]?.t || 0;
+  const around = segs.filter((x) => x.t >= nowT - 30_000 && x.t <= nowT + 2_000 && x.speaker !== "메모");
+  const card: Card = {
+    id: newId("c_"),
+    type: "bookmark",
+    title: note?.trim() || "표시한 순간",
+    body: around.length ? around.map((x) => `${x.speaker}: ${x.text}`).join("\n") : "(이 시점 전후 자막이 아직 없어요)",
+    priority: 2,
+    createdAt: Date.now(),
+    t: nowT,
+    origin: "user",
+  };
+  s.saveCard(card);
+  return card;
+}
+
+/** 통화 중 내가 적는 메모: 발화처럼 저장되어 분석·콜 메모에 반영된다 (상대에게는 보이지 않음). */
+export function addNote(callId: string, text: string, t: number): void {
+  addSegments(callId, [{ id: newId("s_"), speaker: "메모", text: text.trim(), t }]);
+}
+
+export function setFeedback(callId: string, cardId: string, value: "up" | "down" | null): Card | null {
+  const card = store.getCards(callId).find((c) => c.id === cardId);
+  if (!card) return null;
+  const next: Card = { ...card, feedback: value ?? undefined };
+  session(callId).saveCard(next);
+  recordFeedback(card, value);
+  return next;
 }
 
 export async function askQuestion(callId: string, question: string): Promise<Card> {
@@ -289,6 +324,10 @@ function offlineSummary(call: CallMeta, transcript: Segment[], cards: Card[]): s
     "",
     "## 내 자료 연결",
     ...byType("kb").map((c) => `- ${c.title}: ${c.body}`),
+    "",
+    "## 내가 표시한 순간·메모",
+    ...byType("bookmark").map((c) => `- 📌 ${c.title}: ${c.body.split("\n").slice(-2).join(" / ")}`),
+    ...transcript.filter((x) => x.speaker === "메모").map((x) => `- ✎ ${x.text}`),
     "",
     "_ANTHROPIC_API_KEY 를 설정하면 결론·판단 포인트·가설 점검까지 포함한 메모를 만들어요._",
   ].join("\n");

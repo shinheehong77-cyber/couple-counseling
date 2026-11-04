@@ -141,6 +141,27 @@ route("POST", "/api/calls/:id/ask", async (req, res, [id]) => {
   send(res, 200, await engine.askQuestion(id, question.trim()));
 });
 
+route("POST", "/api/calls/:id/bookmark", async (req, res, [id]) => {
+  if (!store.getCall(id)) return send(res, 404, { error: "콜을 찾을 수 없어요" });
+  const { t, note } = await readJsonBody<{ t?: number; note?: string }>(req);
+  send(res, 200, engine.bookmark(id, Number(t) || 0, note));
+});
+
+route("POST", "/api/calls/:id/note", async (req, res, [id]) => {
+  if (!store.getCall(id)) return send(res, 404, { error: "콜을 찾을 수 없어요" });
+  const { text, t } = await readJsonBody<{ text?: string; t?: number }>(req);
+  if (!text?.trim()) return send(res, 400, { error: "메모를 입력해 주세요" });
+  engine.addNote(id, text, Number(t) || 0);
+  send(res, 200, { ok: true });
+});
+
+route("POST", "/api/calls/:id/cards/:cid/feedback", async (req, res, [id, cid]) => {
+  const { value } = await readJsonBody<{ value?: "up" | "down" | null }>(req);
+  const card = engine.setFeedback(id, cid, value === "up" || value === "down" ? value : null);
+  if (!card) return send(res, 404, { error: "카드를 찾을 수 없어요" });
+  send(res, 200, card);
+});
+
 route("POST", "/api/calls/:id/brief", async (_req, res, [id]) => send(res, 200, await engine.preBrief(id)));
 
 route("POST", "/api/calls/:id/end", async (_req, res, [id]) => send(res, 200, { summary: await engine.endCall(id) }));
@@ -172,6 +193,8 @@ route("POST", "/api/calls/:id/stt-local", async (req, res, [id], url) => {
   const recent = store.getSegments(id).slice(-3).map((s) => s.text).join(" ");
   const prompt = [call.counterparty, call.title, recent].filter(Boolean).join(". ");
   const text = await transcribeLocal(wav, { languages: call.languages, prompt });
+  // 미리보기(말하는 도중 자막)는 저장하지 않는다
+  if (url.searchParams.get("preview") === "1") return send(res, 200, { text, preview: true });
   if (text) {
     engine.addSegments(id, [
       { id: newId("s_"), speaker: (url.searchParams.get("speaker") || "상대").slice(0, 20), text, t: Number(url.searchParams.get("t")) || 0 },
