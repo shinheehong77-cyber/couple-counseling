@@ -1,0 +1,29 @@
+{
+  "name": "concall-copilot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "콘콜(컨퍼런스콜) 실시간 보조 시스템 — 녹음, 실시간 자막, 판단 포인트/기술 해석/내 자료/웹 확인 카드",
+  "scripts": {
+    "up": "bash scripts/up.sh",
+    "dev": "tsx watch server/index.ts",
+    "start": "tsx server/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts",
+    "e2e": "node --import tsx test/e2e-demo.ts && node --import tsx test/e2e-local.ts",
+    "stt": "bash scripts/local-stt.sh"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.4.0",
+    "unpdf": "^1.9.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
